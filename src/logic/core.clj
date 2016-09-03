@@ -1,6 +1,5 @@
 (ns logic.core
-  (:require [logic.set :as hz]
-            [clojure.string :as s])
+  (:require [logic.set :as sets])
   (:use hiccup.core)
   (:gen-class))
 
@@ -26,12 +25,15 @@
     [:shownumcorrect]))
 
 (defn matching-questions   "generate questions"
-  [id question answers]
+  [id question answers feedback-text feedback-files]
   (html [:question {:type "matching"}
          [:name [:text id]]
          [:questiontext
           {:format "html"} [:text (cdata question)]]
-         [:generalfeedback {:format "html"} [:text] ]
+         [:generalfeedback {:format "html"}
+          [:text (cdata feedback-text) ]
+          feedback-files
+          ]
          (common-part)
          (for [cnt (range 0 (count answers)) 
                :let [v (nth answers cnt)]]
@@ -55,11 +57,11 @@
   [n filename]
   (do
     (spit filename "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<quiz>")
-    (spit filename (kategoria "halmaz/level1") :append true)
+    (spit filename (category "halmaz/level3") :append true)
     (loop [i 0]
       (when (< i n)
-        (let [[q a id] (hz/set-matching-question i)]
-          (spit filename (parosito id q a) :append true))
+        (let [[q a id ft ff] (sets/set-matching-question i)]
+          (spit filename (matching-questions id q a ft ff) :append true))
           (recur (inc i))  ))
     (spit filename "</quiz>" :append true)))
 

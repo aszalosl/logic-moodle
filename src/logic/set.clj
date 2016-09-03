@@ -1,5 +1,7 @@
 (ns logic.set
-  (:require [clojure.string :as s])
+  (:require [clojure.string :as s]
+            [clojure.java.io :as io]
+            [base64-clj.core :as b64])
   (:gen-class))
 
 (defn combine "combine the elements of 2 sets with all operators"
@@ -39,6 +41,7 @@
 ;; alternative
 ; (def code-uni "the key of the universe (the biggest set)" 15)
 
+(declare calculate)
 (defn set-filter "filter sets belonging a given key"
   [key sets]
   (filter #(= (calculate %) key) sets))
@@ -99,39 +102,6 @@
             (str w1 wop w2)))))
    (case e :a "A" :b "B" :c "C" :0 "\\emptyset"))))
 
-;; # MathJax complatible printing
-;(declare write) ;; forward declaration
-; (defn my-write "write complex expression"
-;   [form]
-;      (if (= :comp (first form))
-;        (str "\\overline{" (write (second form) ) "}")
-;        (let [op (write (first form) )
-;              s1 (write (second form))
-;              s2 (write (nth form 2) )]
-;            (str "(" s1 op s2 ")"))))
-; 
-; (defmulti write type)
-; 
-; (defmethod write clojure.lang.Keyword [kw]
-;    (case kw
-;     :a "A"
-;     :b "B"
-;     :c "C"
-;     :0 "\\emptyset"
-;     ;; :comp "\\not "
-;     :isect "\\cap "
-;     :union "\\cup "
-;     :diff "\\backslash "
-;     :symdiff "\\Delta "))
-; 
-; ; refactored the same part to my-write
-; (defmethod write clojure.lang.PersistentList [form]
-;   (my-write form ))
-; 
-; (defmethod write clojure.lang.Cons [form]
-;   (my-write form ))
-
-
 (defn question-expressions "list of expressions"
   [ep]
     (map #(str "<li>\\(" (write (second %)) "\\)</li>") ep))
@@ -145,10 +115,32 @@
 (defn generate-answers "the matching expressions" [ep]
   (map #(write (nth % 2)) ep))
 
+(defn picture-data "content of the picture" [key]
+  (b64/encode (slurp (io/resource (str "s3-" key ".png")))))
+
+(defn feedback-text "generate the text of it" [ep]
+  ; the expressions and pictures
+  (map #(str "<p>" 
+             (write (second %)) ; exp. from question
+             " &ndash; " 
+             (write (nth % 2)) ; exp. from answer
+             "</p>"
+             "<img src=\"@@PLUGINFILE@@/s3-" 
+             (first %) 
+             ".png\"><br>") ep))
+
+(defn feedback-files "the referenced files" [ep]
+  (for [x ep] 
+     (str "<file name=\"s3-" (first x)
+          ".png\" path=\"/\" encoding=\"base64\">"
+          (picture-data (first x)) "</file>")))
+
 (defn set-matching-question  "generate question, answers, and feedback"
   [i]
   (let [ep (expression-pairs)
         question (generate-question ep)
         answers (generate-answers ep)
-        id (str "HP1-" i)]
-       `(~question ~answers ~id)))
+        id (str "HP1-" i)
+        ft (s/join (feedback-text ep))
+        ff (s/join (feedback-files ep))]
+       `(~question ~answers ~id ~ft ~ff)))

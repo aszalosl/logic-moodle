@@ -1,4 +1,4 @@
-# clojure-halmaz
+# logic-moodle
 
 A Clojure app to generate Moodle XML files with different type questions on logic.
 
@@ -6,4 +6,5 @@ A Clojure app to generate Moodle XML files with different type questions on logi
 
 From REPL:
 * (matching-sets number-of-questions filename) - to generate set mathcing problems
+
 
