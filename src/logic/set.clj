@@ -120,17 +120,19 @@
 
 (defn feedback-text "generate the text of it" [ep]
   ; the expressions and pictures
-  (map #(str "<p>" 
+  (map #(str "<p>\\("
              (write (second %)) ; exp. from question
-             " &ndash; " 
+             "\\) &ndash; \\("
              (write (nth % 2)) ; exp. from answer
-             "</p>"
-             "<img src=\"@@PLUGINFILE@@/s3-" 
-             (first %) 
-             ".png\"><br>") ep))
+             "\\)</p>"
+             "<img src=\"@@PLUGINFILE@@/s3-"
+             (first %)
+             ".png\" alt=\"\" role=\"presentation\" "
+             "style=\"vertical-align:text-bottom; margin: 0 .5em;\" "
+             "class=\"img-responsive\" height=\"240\" width=\"290\"><br>") ep))
 
 (defn feedback-files "the referenced files" [ep]
-  (for [x ep] 
+  (for [x ep]
      (str "<file name=\"s3-" (first x)
           ".png\" path=\"/\" encoding=\"base64\">"
           (picture-data (first x)) "</file>")))
