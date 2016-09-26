@@ -201,10 +201,10 @@
     10 4))
 
 (defn construct-set-answer [sol no-sol]
-  (let [sz (count sol)                 ; no of all good answers
-        r  (number-of-good-answers sz) ; select some of them
-        s4 (take r sol)
-        n3 (take (- 4 r) no-sol)]      ; the others are wrong answers
+  (let [sz (count sol)                      ; no of all good answers
+        r  (number-of-good-answers sz)      ; select some of them
+        s4 (take r (shuffle sol))
+        n3 (take (- 4 r) (shuffle no-sol))] ; the others are wrong answers
     (concat 
       (for [x s4] [x (nth prize r)])
       (for [y n3] [y (nth penalty r)]))))

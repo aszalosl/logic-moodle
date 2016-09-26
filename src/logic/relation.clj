@@ -28,14 +28,10 @@
   (let [rr (range 0 (count r))]
     (for [x rr, y rr :when (f r x y)] [x y])))
 
-; (satisfy2 #(= (get-in %1 [%2 %3]) 1) r1)
-
 (defn- mirrored "values at opposite places" [coll r]
   (for [pair coll] 
     (let [x (first pair), y (second pair)]
       [(get-in r [y x]) x y])))
-
-; (mirrored (satisfy2 #(= (get-in %1 [%2 %3]) 1) r1) r1)
 
 (defn non-symmetric? "the relation is non-symmetric?" [r]
   (find-first #(= 0 (first %)) 
@@ -43,15 +39,11 @@
      (satisfy2 #(= (get-in %1 [%2 %3]) 1) r)
      r)))
 
-;(non-symmetric? r1)
-
 (defn non-asymmetric? "the relation is non-asymmetric?" [r]
   (find-first #(= 1 (first %)) 
     (mirrored 
       (satisfy2 #(= (get-in %1 [%2 %3]) 1) r)
       r)))
-
-;(non-asymmetric? r3)
 
 (defn non-antisymmetric? "the relation is non-antisymmetric?" [r]
   (find-first #(= 1 (first %))
@@ -60,8 +52,6 @@
                       (not= %2 %3) 
                       (= (get-in %1 [%2 %3]) 1)) r)
       r)))
-
-;(non-antisymmetric? r3)
 
 (defn- void0 "add a uninteresting value for the sake of similarity"
   [coll]
@@ -73,9 +63,6 @@
   (void0
     (first (satisfy2 #(= (+ (get-in %1 [%2 %3]) 
                             (get-in %1 [%3 %2])) 0) r))))
-
-;(non-strongly-connected? r3)
-;(conj [2 3] 1)
 
 (defn non-connected? "the relation is non-s-connected?" [r]
   (void0
@@ -92,10 +79,6 @@
     (for [x rr, y rr, z rr :when (f r x y z)]
        [x y z])))
 
-;(satisfy3 #(= (+ (get-in %1 [%2 %3])
-;                 (get-in %1 [%3 %4]) 
-;              2 r1])))
-
 (defn non-transitive? "the relation is non-transitive?" [r]
   (void0
     (first
@@ -105,8 +88,6 @@
               (= (get-in %1 [%2 %4]) 0)) ;0!
         r)))) 
       
-;(non-transitive? r3)
-
 (defn non-intransitive? "the relation is non-intransitive?" [r]
   (void0
     (first
@@ -115,10 +96,6 @@
               (= (get-in %1 [%3 %4]) 1) 
               (= (get-in %1 [%2 %4]) 1))
         r)))) ; 1!
-  
-;(non-intransitive? r1)
-
-;(non-reflexive? r4)
 
 (def names "names of the relations"
   ["reflexív" "irreflexív"
@@ -154,21 +131,16 @@
            ", y=" (inc (nth v 2)) 
            " és z=" (inc (nth v 3)))))
 
-;(feedbacktext [1 2])
-;(feedbacktext '(1 2 3))
-;(feedbacktext [1 2 3])
-;(feedbacktext [1 2 3 4])
-
 (defn construct-relation-answer "generate the answer" [r]
   (let [answers (map vector (for [x functions] (x r)) names)
         sol (filter #(nil? (first %)) answers)
         no-sol (filter #((complement nil?) (first %)) answers)]
     (if (> (count sol) 0)
       (let
-        [sz (count sol)                 ; no of all good answers
-         r  (number-of-good-answers sz) ; select some of them
-         s4 (take r sol)
-         n3 (take (- 4 r) no-sol)]      ; the others are wrong answers
+        [sz (count sol)                      ; no of all good answers
+         r  (number-of-good-answers sz)      ; select some of them
+         s4 (take r (shuffle sol))
+         n3 (take (- 4 r) (shuffle no-sol))] ; the others are wrong answers
         (concat 
           (for [x s4] [(second x) 
                        (nth prize r)])
@@ -176,7 +148,6 @@
                        (nth penalty r) 
                        (feedbacktext (first y))]))))))
 
-;(construct-relation-answer r1)
 (defn print-row "print one row of the table" [y xs]
    (str "<tr><th>" y "</th>" 
      (clojure.string/join 
@@ -194,7 +165,6 @@
       (for [x (range 0 (count r))]
         (print-row (inc x) (get r x)))) 
     "</table>"))         
-;(first nil)
 
 (construct-relation-question r1)
 
