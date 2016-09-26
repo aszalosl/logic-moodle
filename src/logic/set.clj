@@ -1,7 +1,5 @@
 (ns logic.set
   (:require [clojure.string :as s]
-            [clojure.java.io :as io]
-            [base64-clj.core :as b64]
             [clojure.set :as cs])
   (:gen-class))
 
@@ -144,9 +142,6 @@
 (defn generate-answers "the matching expressions" [ep]
   (map #(write (nth % 2)) ep))
 
-(defn picture-data "content of the picture" [key]
-  (b64/encode (slurp (io/resource (str "s3-" key ".png")))))
-
 (defn colored "the region coded with i is colored" [i a]
   (if (pos? (bit-and i (first a))) "X" "-"))
 
@@ -169,12 +164,6 @@
              "<td>" (colored 4 %) "</td>"
              "<td>" (colored 8 %) "</td>"
              "</tbody></table>") ep))
-
-(defn feedback-files "the referenced files" [ep]
-  (for [x ep]
-     (str "<file name=\"s3-" (first x)
-          ".png\" path=\"/\" encoding=\"base64\">"
-          (picture-data (first x)) "</file>")))
 
 (defn set-matching-question  "generate question, answers, and feedback"
   [i]
@@ -212,10 +201,10 @@
     10 4))
 
 (defn construct-set-answer [sol no-sol]
-  (let [sz (count sol)
-        r  (number-of-good-answers sz)
+  (let [sz (count sol)                 ; no of all good answers
+        r  (number-of-good-answers sz) ; select some of them
         s4 (take r sol)
-        n3 (take (- 4 r) no-sol)]
+        n3 (take (- 4 r) no-sol)]      ; the others are wrong answers
     (concat 
       (for [x s4] [x (nth prize r)])
       (for [y n3] [y (nth penalty r)]))))

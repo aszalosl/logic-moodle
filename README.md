@@ -5,6 +5,9 @@ A Clojure app to generate Moodle XML files with different type questions on logi
 ## Usage
 
 From REPL:
-* (matching-sets number-of-questions filename) - to generate set mathcing problems
+
+Sets:
+* (members-of-sets number-of-questions filename) - to generate set members problems
+* (matching-sets number-of-questions filename) - to generate set matching problems
 
 

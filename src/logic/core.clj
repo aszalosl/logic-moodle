@@ -1,5 +1,6 @@
 (ns logic.core
   (:require [logic.set :as sets])
+  (:require [logic.relation :as rels])
   (:use hiccup.core)
   (:gen-class))
 
@@ -40,7 +41,8 @@
             [:answer [:text (str (inc cnt))]]])]))
          
 
-(defn multi "generate MCQ tests" [id question feedback answers]
+(defn multi-common "generate MCQ tests with common feedback" 
+  [id question feedback answers]
   (html [:question {:type "multichoice"}
          [:name [:text id]]
          [:questiontext {:format "html"} [:text (cdata question)]]
@@ -52,6 +54,23 @@
           [:answer {:fraction (second x) :format "html"}
             [:text (cdata (first x))]
             [:feedback {:format "html"} [:text]]])]))
+
+(defn multi-separate "generate MCQ tests with separated feedback" 
+  [id question answers]
+  (html [:question {:type "multichoice"}
+         [:name [:text id]]
+         [:questiontext {:format "html"} [:text (cdata question)]]
+         [:generalfeedback {:format "html"} [:text]]
+         [:single "false"]
+         [:answernumbering "abc"]
+         (common-part)
+         (for [x answers]
+          ;(print x)
+          [:answer {:fraction (second x) :format "html"}
+            [:text (cdata (first x))]
+            [:feedback {:format "html"} 
+             [:text (when (= (count x) 3)
+                      (cdata (nth x 2)))]]])]))
 
 (defn matching-sets "Match the corresponding set expressions!"
   [n filename]
@@ -76,13 +95,28 @@
           (if (nil? all)
             (recur i)
             (let [[q a id fb] all]
-              (spit filename (multi id q fb a) :append true)
+              (spit filename (multi-common id q fb a) :append true)
               (recur (inc i)))))))
     (spit filename "</quiz>" :append true)))
 
-
+(rels/construct-relation 1)
+(defn relations "Select properties of a relation"  [n filename]
+  (do
+    (spit filename "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<quiz>")
+    (spit filename (category "relacio/level1") :append true)
+    (loop [i 0]
+      (when (< i n)
+        (let [all (rels/construct-relation i)]
+          (if (nil? all)
+            (recur i)
+            (let [[q a id] all]
+              (spit filename (multi-separate id q a) :append true)
+              (recur (inc i)))))))
+    (spit filename "</quiz>" :append true)))
 (defn -main []
   (println "Use the REPL to generate questions!"))
 
 (comment (members-of-sets 5 "HM1a.xml")) ; set construction
 (comment (matching-sets 100 "HP3a.xml")) ; set pairing
+(comment (relations 5 "RP1.xml")) ; relations
+
