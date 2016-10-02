@@ -1,118 +1,33 @@
 (ns logic.core
   (:require [logic.set :as sets])
   (:require [logic.relation :as rels])
-  (:use hiccup.core)
+  (:require [logic.outer :as out])
+  (:require [logic.xml :as xml])
   (:gen-class))
 
-(defn cdata [& args]
-  (str "<![CDATA[" (apply str args) "]]>"))
 
-(defn category "generate category part for Moodle XML"
-  [cat]
-  (html
-    [:question {:type "category"}
-      [:category [:text (str "$course$/" cat)]]]))
+;; different kind of tests
 
-(defn common-part "DRY" []
-  (html [:defaultgrade "1.000"]
-    [:penalty "0.33"]       ;; not used
-    [:hidden "0"]           ;; ???
-    [:shuffleanswers "true"];; yes, we need this
-    ; for Hungarian students
-    [:correctfeedback {:format "html"} [:text "Válasza helyes."]]
-    [:partiallycorrectfeedback {:format "html"}
-      [:text "Válasza részben helyes."]]
-    [:incorrectfeedback {:format "html"} [:text "Válasza helytelen."]]
-    [:shownumcorrect]))
-
-(defn matching-questions   "generate questions"
-  [id question answers feedback-text]
-  (html [:question {:type "matching"}
-         [:name [:text id]]
-         [:questiontext
-          {:format "html"} [:text (cdata question)]]
-         [:generalfeedback {:format "html"}
-          [:text (cdata feedback-text)]]
-         (common-part)
-         (for [cnt (range 0 (count answers)) 
-               :let [v (nth answers cnt)]]
-           [:subquestion {:format "html"} 
-            [:text (cdata "\\(" v "\\)")]  ; an expression for MathJax!
-            [:answer [:text (str (inc cnt))]]])]))
-         
-
-(defn multi-common "generate MCQ tests with common feedback" 
-  [id question feedback answers]
-  (html [:question {:type "multichoice"}
-         [:name [:text id]]
-         [:questiontext {:format "html"} [:text (cdata question)]]
-         [:generalfeedback {:format "html"} [:text (cdata feedback)]]
-         [:single "false"]
-         [:answernumbering "abc"]
-         (common-part)
-         (for [x answers]
-          [:answer {:fraction (second x) :format "html"}
-            [:text (cdata (first x))]
-            [:feedback {:format "html"} [:text]]])]))
-
-(defn multi-separate "generate MCQ tests with separated feedback" 
-  [id question answers]
-  (html [:question {:type "multichoice"}
-         [:name [:text id]]
-         [:questiontext {:format "html"} [:text (cdata question)]]
-         [:generalfeedback {:format "html"} [:text]]
-         [:single "false"]
-         [:answernumbering "abc"]
-         (common-part)
-         (for [x answers]
-          ;(print x)
-          [:answer {:fraction (second x) :format "html"}
-            [:text (cdata (first x))]
-            [:feedback {:format "html"} 
-             [:text (when (= (count x) 3)
-                      (cdata (nth x 2)))]]])]))
-
-(defn matching-sets "Match the corresponding set expressions!"
+(defn mathching-sets "Match the set pairs"
   [n filename]
-  (do
-    (spit filename "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<quiz>")
-    (spit filename (category "halmaz/level3") :append true)
-    (loop [i 0]
-      (when (< i n)
-        (let [[q a id ft] (sets/set-matching-question i)]
-          (spit filename (matching-questions id q a ft) :append true))
-        (recur (inc i))))
-    (spit filename "</quiz>" :append true)))
+  (xml/matching-problems)  n  filename
+    "halmaz/level3" sets/set-matching-question)
 
 (defn members-of-sets "Select the suitable elements!"
   [n filename]
-  (do
-    (spit filename "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<quiz>")
-    (spit filename (category "halmaz/level1") :append true)
-    (loop [i 0]
-      (when (< i n)
-        (let [all (sets/construct-set i)]
-          (if (nil? all)
-            (recur i)
-            (let [[q a id fb] all]
-              (spit filename (multi-common id q fb a) :append true)
-              (recur (inc i)))))))
-    (spit filename "</quiz>" :append true)))
+  (xml/mcq-general n filename "halmaz/level1" sets/construct-set))
 
-(rels/construct-relation 1)
 (defn relations "Select properties of a relation"  [n filename]
-  (do
-    (spit filename "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<quiz>")
-    (spit filename (category "relacio/level1") :append true)
-    (loop [i 0]
-      (when (< i n)
-        (let [all (rels/construct-relation i)]
-          (if (nil? all)
-            (recur i)
-            (let [[q a id] all]
-              (spit filename (multi-separate id q a) :append true)
-              (recur (inc i)))))))
-    (spit filename "</quiz>" :append true)))
+  (xml/mcq-separate n filename "relacio/level1" rels/construct-relation))
+
+;; tests from outer files
+(defn fn-quiz "test about inductive definitions" [n]
+  (out/mcq-separate n "inductive.clj" "FORM1.xml" "fn/level1"))
+
+(defn wff-quiz "well formed formulae test" [n]
+  (out/mcq-separate n "wff.clj" "WFF.xml" "formula/level1"))
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn -main []
   (println "Use the REPL to generate questions!"))
 

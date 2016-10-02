@@ -72,7 +72,7 @@
                          (get-in %1 [%3 %2]))))
              r))))
  
-(non-connected? r3)
+; (non-connected? r3)
 
 (defn- satisfy3 "pairs from r where f holds" [f r]
   (let [rr (range 0 (count r))]
@@ -155,7 +155,7 @@
                      (if (= x 1) "X" "-") 
                      "</td>")))
      "</tr>"))
-(print-row  1 [1 2 3])
+;(print-row  1 [1 2 3])
 
 (defn construct-relation-question "generate the question" [r]
   (str "Adott az alábbi reláció. Válassza ki, hogy a " 
@@ -166,10 +166,11 @@
         (print-row (inc x) (get r x)))) 
     "</table>"))         
 
-(construct-relation-question r1)
+;(construct-relation-question r1)
 
 (defn my-bit "mask a number to get a bit" [i mask]
   (/ (bit-and i mask) mask))
+
 (defn construct-relation "generate a relation problem" [i]
   (let [x (rand-int 512)
         r [
@@ -182,5 +183,5 @@
        a
        (str "RP1-" i)])))
      
-(construct-relation 25)        
+;(construct-relation 25)        
 
