@@ -1,37 +1,49 @@
+;;;; Main level of the software, we can generate Moodle XML files from here.
+;;;; All the other files are tools, implement some type of tests.
+
 (ns logic.core
   (:require [logic.set :as sets])
   (:require [logic.relation :as rels])
   (:require [logic.outer :as out])
   (:require [logic.xml :as xml])
+  (:require [logic.formula :as form])
   (:gen-class))
 
 
-;; different kind of tests
+;; ### Generate problems alone
 
-(defn mathching-sets "Match the set pairs"
+(defn mathching-sets "Match the pairs of sets."
   [n filename]
   (xml/matching-problems)  n  filename
     "halmaz/level3" sets/set-matching-question)
 
-(defn members-of-sets "Select the suitable elements!"
+(defn members-of-sets "Which ones are elements of some given set?"
   [n filename]
   (xml/mcq-general n filename "halmaz/level1" sets/construct-set))
 
-(defn relations "Select properties of a relation"  [n filename]
-  (xml/mcq-separate n filename "relacio/level1" rels/construct-relation))
+(defn relations "Select the properties of a given relation."  [n filename]
+  (xml/mcq-separate n filename "relacio/level1" rels/relation-problem))
 
-;; tests from outer files
-(defn fn-quiz "test about inductive definitions" [n]
+;; #### Concrete test generation
+(comment (members-of-sets 5 "HM1a.xml")) ; set construction
+(comment (matching-sets 100 "HP3a.xml")) ; set pairing
+(comment (relations 5 "RP1.xml")) ; relations
+(comment (xml/short-quiz 20 "Quine1.xml" "formula/quine1" form/quine-test1))
+(comment (xml/short-quiz 50 "Quine2.xml" "formula/quine2" form/quine-test2))
+(comment (xml/short-quiz 50 "Quine3.xml" "formula/quine3" form/quine-test3))
+;; ### Generate test from given answers
+
+(defn fn-quiz "Find the parts of the inductive function definitions." [n]
   (out/mcq-separate n "inductive.clj" "FORM1.xml" "fn/level1"))
 
-(defn wff-quiz "well formed formulae test" [n]
+(defn wff-quiz "Select the well formed formulae." [n]
   (out/mcq-separate n "wff.clj" "WFF.xml" "formula/level1"))
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn subformula-quiz1 "Select the subformulae at full formula." [n]
+  (out/mcq-separate n "subform.clj" "SF1.xml" "formula/level2"))
+
 
 (defn -main []
   (println "Use the REPL to generate questions!"))
 
-(comment (members-of-sets 5 "HM1a.xml")) ; set construction
-(comment (matching-sets 100 "HP3a.xml")) ; set pairing
-(comment (relations 5 "RP1.xml")) ; relations
 
