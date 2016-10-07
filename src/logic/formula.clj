@@ -172,6 +172,14 @@
 
     (case f :p cP3 :q cQ3 :r cR3 :f 0 :t cT3)))
 
+(defn truth-table-main-column "values from interpretations 00...0 to 11...1"
+  [code size]
+  (s/join (take size (reverse (str "0000000" (Integer/toBinaryString code))))))
+
+(defn ttmc2 "values from interpretations 00 to 11"
+  [code]
+  (truth-table-main-column code 4))
+
 (defn quine-test "generate a random formulae with given parameters,
                   and construct the test based on it"
   [i pars f]
@@ -185,10 +193,7 @@
                (write f)
                " \\) igazságtáblájának a fő oszlopa az interpretációk"
                " <i>növekvő</i> sorrendje esetén?")
-            ans (s/join
-                  (take size (reverse (str
-                                     "00000000"
-                                     (Integer/toBinaryString c)))))
+            ans (truth-table-main-column c size)
             id (str "QTT" p "-" i)
             fb (str "a megoldás: " ans)]
           [q ans id fb]))))
@@ -204,6 +209,162 @@
 (defn quine-test3 "Test with 3 parameter"
   [i]
   (quine-test i [:p :q :r] (random-formula 5 [:p :q :r])))
+
+;; ### Model quiz
+;;
+;; Only with 2 parameters
+
+(def form2 "formulae with two parameter"
+    (form [:p :q]))
+
+(defn equ-class2 "Equivalence class of formulae with code n"
+  [n]
+  (for [x form2 :when (= n (code2 x))] x))
+
+;(equ-class2 0)
+
+;; #### some quiz for a formula
+
+(defn print-good-items "print the good formulae in formatted way"
+  [code n]
+  (s/join (map #(str "    \"\\( " (write %) " \\)\"\n")
+             (repeatedly n #(rand-nth (equ-class2 code))))))
+
+(defn print-bad-items "print the not suitable formulae
+                       and a feedback about its class"
+  [code n]
+  (s/join (map #(str "    [\"\\( " (write %) " \\)\""
+                     " \"az igazságtábla főoszlopa: "
+                     (ttmc2 code) "\"]\n")
+             (repeatedly n #(rand-nth (equ-class2 code))))))
+
+(defn cont-quiz2 "generate a semi-question for a quiz
+                  about contradictory formulae"
+  []
+  (str "[{:question \"Jelölje meg a kielégíthetetlen formulákat!\"\n  :good [\n"
+       (print-good-items 0 30)
+       "  ]\n  :wrong [\n"
+       (s/join (for [i (range 1 16)] (print-bad-items i 5)))
+       "]}]\n"))
+
+(comment (spit "contra2.clj" (cont-quiz2)))
+
+(defn valid-quiz2 "generate a semi-question for a quiz about valid formulae"
+  []
+  (str "[{:question \"Jelölje meg az érvényes formulákat!\"\n  :good [\n"
+       (print-good-items  15 30)
+       "  ]\n  :wrong [\n"
+       (s/join (for [i (range 0 15)] (print-bad-items i 5)))
+       "]}]\n"))
+
+(comment (spit "valid2.clj" (valid-quiz2)))
+
+(defn sat-quiz2 "generate a semi-question for a quiz about satisfiable formulae"
+  []
+  (str "[{:question \"Jelölje meg a kielégíthető,"
+       " de nem érvényes formulákat!\"\n  :good [\n"
+       (s/join (for [i (range 1 15)] (print-good-items i 5)))
+       "  ]\n  :wrong [\n"
+       (s/join [(print-bad-items 0 30) (print-bad-items 15 30)])
+       "]}]\n"))
+
+(comment (spit "sat2.clj" (sat-quiz2)))
+
+(defn logic_conseq "generate a semi-question for a quiz about
+                    logical consequence of a formula"
+  []
+  (s/join
+    (for [i (range 0 16)]
+      (str " {:question \"Jelölje meg a \\( "
+           (write (rand-nth (equ-class2 i)))
+           " \\) formula logikai következményeit!\"\n  :good [\n"
+           (s/join (for [j (range 0 16) :when (= 0 (bit-and i (- 15 j)))]
+                     (print-good-items j 5)))
+           "  ]\n  :wrong [\n"
+         (s/join
+           (for [k (range 0 4) j (range 0 16)
+                  :when (not= 0 (bit-and i (- 15 j)))]
+             (str
+               "            [\"\\( " (write (rand-nth (equ-class2 j))) " \\)\""
+               " \"a konklúzió igazságtáblájának főoszlopa: " (ttmc2 j)
+               ", míg a hipotézis igazságtáblájának főoszlopa " (ttmc2 i)
+               " \"]\n")))
+         "]}\n"))))
+
+(comment (spit "lc1a.clj" (logic_conseq)))
+
+(defn logic_conseq2 "generate a semi-question for a quiz about
+                    logical consequence of something"
+  []
+  (s/join
+    (for [i (range 0 16)]
+      (str " {:question \"Jelölje meg azokat a formulákat, melyeknek a \\( "
+           (write (rand-nth (equ-class2 i)))
+           " \\) formula logikai következménye! (Külön-külön)\"\n  :good [\n"
+           (s/join (for [j (range 0 16) :when (= 0 (bit-and j (- 15 i)))]
+                     (print-good-items j 5)))
+           "  ]\n  :wrong [\n"
+         (s/join
+           (for [k (range 0 4) j (range 0 16)
+                  :when (not= 0 (bit-and j (- 15 i)))]
+             (str
+               "            [\"\\( " (write (rand-nth (equ-class2 j))) " \\)\""
+               " \"a hipotézis igazságtáblájának főoszlopa: " (ttmc2 j)
+               ", míg a konklúzió igazságtáblájának főoszlopa " (ttmc2 i)
+               " \"]\n")))
+         "]}\n"))))
+
+(comment (spit "lc1b.clj" (logic_conseq2)))
+
+;; #### some quiz for set of formulae
+
+(defn make-quiz2 "generate a semi-question for a quiz with criteria f"
+  [f question]
+  (str " {:question \"" question "\"\n  :good [\n"
+       (s/join (for [x (range 0 16) y (range 0 16) :when (f x y)]
+                 (str "         \"\\( \\{"
+                      (write (rand-nth (equ-class2 x))) ",\\ "
+                      (write (rand-nth (equ-class2 y))) "\\} \\)\"\n")))
+       "  ]\n  :wrong [\n"
+       (s/join (for [x (range 0 16) y (range 0 16) :when (not (f x y))]
+                 (str "          [\"\\( \\{"
+                      (write (rand-nth (equ-class2 x))) ",\\ "
+                      (write (rand-nth (equ-class2 y))) "\\} \\)\" \""
+                      "az igazságtáblák főoszlopai " (ttmc2 x) " és "
+                      (ttmc2 y) "\"]\n")))
+       "]}\n"))
+
+(comment (spit "contG22.clj"
+           (make-quiz2 #(= 0 (bit-and %1 %2))
+             "Jelölje meg a kielégíthetetlen formulahalmazokat!")))
+
+(comment (spit "satG22.clj"
+           (make-quiz2 #(not= 0 (bit-and %1 %2))
+             "Jelölje meg a kielégíthetető formulahalmazokat!")))
+
+(defn logic_conseq3 "generate a semi-question for a quiz about
+                    logical consequence of formulae"
+  []
+  (s/join
+    (for [i (range 0 16) j (range 0 16) :when (< i j)]
+      (str " {:question \"Jelölje meg a \\( \\{"
+           (write (rand-nth (equ-class2 i))) "\\), \\("
+           (write (rand-nth (equ-class2 j))) "\\} "
+           " \\) formulahalmaz logikai következményeit!\"\n  :good [\n"
+           (s/join (for [k (range 0 16) :when (= 0 (bit-and i j (- 15 k)))]
+                     (print-good-items k 5)))
+           "  ]\n  :wrong [\n"
+         (s/join
+           (for [l (range 0 4) k (range 0 16)
+                  :when (not= 0 (bit-and i j (- 15 k)))]
+             (str
+               "            [\"\\( " (write (rand-nth (equ-class2 j))) " \\)\""
+               " \"a konklúzió igazságtáblájának főoszlopa: " (ttmc2 k)
+               ", míg a hipotézisek igazságtábláinak főoszlopai " (ttmc2 i)
+               " és " (ttmc2 j) " \"]\n")))
+         "]}\n"))))
+
+(comment (spit "lc2.clj" (logic_conseq3)))
 
 
 ;; ### Subformulae quiz

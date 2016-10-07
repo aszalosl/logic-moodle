@@ -36,7 +36,7 @@
 (defn generate-problem "From an _id_ and a _question_ we generate
                         the data of an MCQ."
   [id q]
-   [(q :question) (construct-answer q) (str "FN" id "-")])
+  [(q :question) (construct-answer q) (str "FN" id "-")])
 
 
 (defn mcq-question "From a _question_ we generate _n_ different MCQ
@@ -74,16 +74,15 @@
       (spit out (str "\\documentclass{article}\n"
                    "\\usepackage[utf8]{inputenc}"
                    "\\begin{document}\n"))
-            (doseq [x data]
-        (spit out (str
-                    (:question x)
-                    "\n\\begin{enumerate}\n")
-              :append true)
-        (doseq [y (:good x)]
-          (spit out (str "  \\item " y "\n") :append true))
-        (spit out "\\end{enumerate}\n \\begin{enumerate}\n" :append true)
-        (doseq [y (:wrong x)]
-          (spit out (str "  \\item " (first y) ", " (second y) "\n") :append true))
-        (spit out "\\end{enumerate}\n" :append true))
+      (doseq [x data]
+       (spit out (str
+                   (:question x)
+                   "\n\\begin{enumerate}\n")
+             :append true)
+       (doseq [y (:good x)]
+         (spit out (str "  \\item " y "\n") :append true))
+       (spit out "\\end{enumerate}\n \\begin{enumerate}\n" :append true)
+       (doseq [y (:wrong x)]
+         (spit out (str "  \\item " (first y) ", " (second y) "\n") :append true))
+       (spit out "\\end{enumerate}\n" :append true))
       (spit out "\\end{document}" :append true))))
-

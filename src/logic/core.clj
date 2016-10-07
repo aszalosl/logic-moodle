@@ -42,8 +42,29 @@
 (defn subformula-quiz1 "Select the subformulae at full formula." [n]
   (out/mcq-separate n "subform.clj" "SF1.xml" "formula/level2"))
 
+(defn contra2-quiz "Model - contradictory formulae." [n]
+  (out/mcq-separate n "contra2.clj" "contra.xml" "formula/model/contra2"))
+
+(defn valid2-quiz "Model - valid formulae." [n]
+  (out/mcq-separate n "valid2.clj" "valid.xml" "formula/model/valid2"))
+
+(defn sat2-quiz "Model - satisfiable formulae." [n]
+  (out/mcq-separate n "sat2.clj" "sat.xml" "formula/model/sat2"))
+
+(defn contra2G-quiz "Model - contradictory set of formulae." [n]
+  (out/mcq-separate n "contG22.clj" "contraG.xml" "formula/model/contra-set2"))
+
+(defn sat2G-quiz "Model - satisfiable set of formulae." [n]
+  (out/mcq-separate n "satG22.clj" "satG.xml" "formula/model/sat-set2"))
+
+(defn lc1a-quiz "Model - logical consequence of a formula." [n]
+  (out/mcq-separate n "lc1a.clj" "lc1a.xml" "formula/model/lc1a"))
+
+(defn lc1b-quiz "Model - logical consequence of a something." [n]
+  (out/mcq-separate n "lc1b.clj" "lc1b.xml" "formula/model/lc1b"))
+
+(defn lc2-quiz "Model - logical consequence of a formula." [n]
+  (out/mcq-separate n "lc2.clj" "lc2.xml" "formula/model/lc2"))
 
 (defn -main []
   (println "Use the REPL to generate questions!"))
-
-
