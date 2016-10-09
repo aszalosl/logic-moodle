@@ -66,5 +66,14 @@
 (defn lc2-quiz "Model - logical consequence of a formula." [n]
   (out/mcq-separate n "lc2.clj" "lc2.xml" "formula/model/lc2"))
 
+(defn modelA2-quiz "Model - model of a formula with 2 variables." [n]
+  (out/mcq-separate n "model2.clj" "modelA2.xml" "formula/model/modelA2"))
+
+(defn modelA3-quiz "Model - model of a formula with 3 variables." [n]
+  (out/mcq-separate n "model3.clj" "modelA3.xml" "formula/model/modelA3"))
+
+(defn modelG4-quiz "Model - model of a formula set with 4 variables." [n]
+  (out/mcq-separate n "model4.clj" "modelG4.xml" "formula/model/modelG4"))
+
 (defn -main []
   (println "Use the REPL to generate questions!"))
