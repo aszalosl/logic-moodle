@@ -11,10 +11,10 @@
 
 ;; For testing purposes we define some relations:
 
-(def r1 [[1 0 1] [1 1 1] [0 0 0]])
-(def r2 [[1 0 1] [1 1 1] [0 0 1]])
-(def r3 [[0 1 1] [1 0 1] [1 1 0]])
-(def r4 [[1 1 0] [1 0 1] [1 1 0]])
+;    (def r1 [[1 0 1] [1 1 1] [0 0 0]])
+;    (def r2 [[1 0 1] [1 1 1] [0 0 1]])
+;    (def r3 [[0 1 1] [1 0 1] [1 1 0]])
+;    (def r4 [[1 1 0] [1 0 1] [1 1 0]])
 
 ;; To help the students we show a counter-example, if its answer is wrong.
 ;; Hence the properties below search for counter-examples,
@@ -161,7 +161,7 @@
   [r]
   (str "Adott az alábbi reláció. Válassza ki, hogy a "
      "felsoroltak közül mely tulajdonságok teljesülnek a relációra!"
-     "<table><tr><td></td><th>1</th><th>2</th><th>3</th></tr>"
+     "<table border=\"1\"><tr><td></td><th>1</th><th>2</th><th>3</th></tr>"
     (clojure.string/join
       (for [x (range 0 (count r))]
         (print-row (inc x) (get r x))))

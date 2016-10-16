@@ -20,7 +20,7 @@
 (defn complement-sets "generate the complement sets"
   [s]
   (for [x s]
-    [:comp ~x]))
+    [:comp x]))
 
 (defn s1 "set expressions with one operator"
   [s0]
@@ -54,7 +54,7 @@
 (defn write "from a structure we generate a string"
   ([e] (write e false))
   ([e outer]
-   (if (seq? e)
+   (if (vector? e)
      (let [op (first e)]
        (if (= :comp op)
          (str "\\overline{" (write (second e) false) "}")
@@ -94,7 +94,7 @@
 
 (defn calculate
   [e]
-  (if (seq? e)
+  (if (vector? e)
     (let [op (first e)
           k1 (calculate (second e))]
       (if (= :comp op)
@@ -118,7 +118,7 @@
   [sets]
   (for [key (range 0 code-uni)
         :let [s (set-filter key sets)]
-        :when (and (seq s) (seq (rest s)))]
+        :when (and (seq s) (seq (rest s)))] ; we got a list
     [key s]))
 
 ;; We assume that at introductory examples 3 connectives are enough.
@@ -201,7 +201,7 @@
                  set expression. Here the content of starting sets
                  are change, so need to be argument at calculation."
   [e a b c]
-  (if (seq? e)
+  (if (vector? e)
     (let [op (first e)
           k1 (set-value (second e) a b c)]
       (if (= :comp op)

@@ -1,13 +1,13 @@
 ;;;; We can generate test from external files, too.
 
-;; Here in one file the question, a general feedback, a set of good answers 
+;; Here in one file the question, a general feedback, a set of good answers
 ;; and a set of bad answers (and feedback to each of them) are given.
 ;;
 ;; The stucture of the datafile is the following:
 ;;
 ;;     FILE :=        [ Q1 Q2 ...]
 ;;     Qi :=          {:question "text of the question"
-;;                     : feedback "text of feedback"  (optional)         
+;;                     : feedback "text of feedback"  (optional)
 ;;                     :good GOOD-ANSWERS
 ;;                     :wrong BAD-ANSWERS}
 ;;     GOOD-ANSWERS:= [ "1st answer" "2nd answer" ...]
@@ -21,7 +21,7 @@
   (:require [logic.common :as cmn])
   (:gen-class))
 
-(defn construct-answer 
+(defn construct-answer
   "Choose randomly from good and bad answers.
   Args: q - the semi-question"
   [q]
@@ -37,18 +37,18 @@
                             (nth cmn/penalty some-good)
                             (second y)]))))
 
-(defn generate-problem 
+(defn generate-problem
   "Generate the parts of the questions.
-  Args: 
+  Args:
     id - id of the question
     q - semi-question"
   [id q]
   [(q :question) (construct-answer q) (str "FN" id "-") (q :feedback)])
 
 
-(defn mcq-question 
+(defn mcq-question
   "Generate from a semi-question n different question and write them out.
-  Args: 
+  Args:
    n - number questions generated,
    counter - id of the semi-question,
    question - the question, the feedbacks, good and bad answers
@@ -56,14 +56,14 @@
   [n counter question filename-out]
   (loop [i 1]
     (when (<= i n)
-      (let [[question-text answers id feedback] 
+      (let [[question-text answers id feedback]
             (generate-problem counter question)]
         (spit filename-out
-          (xml/mcq-question (str id i) question-text answers feedback) 
+          (xml/mcq-question (str id i) question-text answers feedback)
           :append true)
         (recur (inc i))))))
 
-(defn mcq-xml 
+(defn mcq-xml
   "Generate xml file from semi questions.
   Args:
    n - number of questions generated from 1 semi-question
@@ -78,7 +78,7 @@
         (mcq-question n nu q filename-out))
       (xml/tail filename-out))))
 
-(defn mcq-xml-res 
+(defn mcq-xml-res
   "Generate xml file from resource files of semi-questions.
   Args:
    n - number of questions generated from 1 semi-question
@@ -96,11 +96,11 @@
 ;; (like sets, formulae) we need to add math mode delimiters in the answers.
 
 
-(defn to-latex 
+(defn to-latex
   "Semiquestions in printable format
   Args:
    in - file of semiquestions
-   out - LaTeX file" 
+   out - LaTeX file"
   [in out]
   (let [data (read-string (slurp (.getPath
                                    (clojure.java.io/resource in))))]
@@ -111,7 +111,7 @@
       (doseq [x data]
        (spit out (str
                    (:question x)
-                   (when-not (nil? (:feedback x)) (:feedback x)) 
+                   (when-not (nil? (:feedback x)) (:feedback x))
                    "\n\\begin{enumerate}\n")
              :append true)
        (doseq [y (:good x)]
