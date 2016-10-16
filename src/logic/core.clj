@@ -10,70 +10,64 @@
   (:gen-class))
 
 
-;; ### Generate problems alone
-
-(defn mathching-sets "Match the pairs of sets."
-  [n filename]
-  (xml/matching-problems)  n  filename
-    "halmaz/level3" sets/set-matching-question)
-
-(defn members-of-sets "Which ones are elements of some given set?"
-  [n filename]
-  (xml/mcq-general n filename "halmaz/level1" sets/construct-set))
-
-(defn relations "Select the properties of a given relation."  [n filename]
-  (xml/mcq-separate n filename "relacio/level1" rels/relation-problem))
-
-;; #### Concrete test generation
-(comment (members-of-sets 5 "HM1a.xml")) ; set construction
-(comment (matching-sets 100 "HP3a.xml")) ; set pairing
-(comment (relations 5 "RP1.xml")) ; relations
+;; ### Generate complete problems
+;; set member-problem, the feedback is the members of the set
+(comment (xml/mcq-xml 50 "HM1.xml" "halmaz/level1" sets/construct-set))
+;; set matching problems, the feedback is a table about regions
+(comment (xml/matching-problems 100 "HP3.xml" "halmaz/level3" sets/set-matching-question))
+;; properties of a random relation
+(comment (xml/mcq-xml 50 "RP1.xml" "relacio/level1" rels/relation-problem))
+;; main column of Quine tables
 (comment (xml/short-quiz 20 "Quine1.xml" "formula/quine1" form/quine-test1))
 (comment (xml/short-quiz 50 "Quine2.xml" "formula/quine2" form/quine-test2))
 (comment (xml/short-quiz 50 "Quine3.xml" "formula/quine3" form/quine-test3))
-;; ### Generate test from given answers
 
-(defn fn-quiz "Find the parts of the inductive function definitions." [n]
-  (out/mcq-separate n "inductive.clj" "FORM1.xml" "fn/level1"))
+;; ### Generate test from semi questions
+;; inductive definitions
+(comment (out/mcq-xml-res 5 "inductive.clj" "FORM1.xml" "fn/level1"))
+;; well formed formulae
+(comment (out/mcq-xml-res 30 "wff.clj" "WFF.xml" "formula/wff1"))
+;; subformulae of a formula
+(comment (out/mcq-xml-res 7 "subform.clj" "SF1.xml" "formula/subformula1"))
+;; contradictory formulae
+(comment (out/mcq-xml-res 100 "contra2.clj" "contra.xml" "formula/model/contra2"))
+;; valid formulae
+(comment (out/mcq-xml-res 100 "valid2.clj" "valid.xml" "formula/model/valid2"))
+;; satifiable formulae
+(comment (out/mcq-xml-res 100 "sat2.clj" "sat.xml" "formula/model/sat2"))
+;; contradictory set of formulae
+(comment (out/mcq-xml-res 100 "contG22.clj" "contraG.xml" "formula/model/contra-set2"))
+;; satifiable set of formulae
+(comment (out/mcq-xml-res 100 "satG22.clj" "satG.xml" "formula/model/sat-set2"))
+;;  logical consequence of a formula
+(comment (out/mcq-xml-res 7 "lc1a.clj" "lc1a.xml" "formula/model/lc1a"))
+;; logical consequence of something
+(comment (out/mcq-xml-res 7 "lc1b.clj" "lc1b.xml" "formula/model/lc1b"))
+;; logical consequence of a set of formulae
+(comment (out/mcq-xml-res 1 "lc2.clj" "lc2.xml" "formula/model/lc2"))
+;;  model of a formula with 2 variables
+(comment (out/mcq-xml-res 25 "model2.clj" "modelA2.xml" "formula/model/modelA2"))
+;;  model of a formula with 3 variables
+(comment (out/mcq-xml-res 14 "model3.clj" "modelA3.xml" "formula/model/modelA3"))
+;;  model of a set of formulae with 4 variables
+(comment (out/mcq-xml-res 7 "model4.clj" "modelG4.xml" "formula/model/modelG4"))
+;; ### Generate semi questions
 
-(defn wff-quiz "Select the well formed formulae." [n]
-  (out/mcq-separate n "wff.clj" "WFF.xml" "formula/level1"))
 
-(defn subformula-quiz1 "Select the subformulae at full formula." [n]
-  (out/mcq-separate n "subform.clj" "SF1.xml" "formula/level2"))
+(defn -main [& args]
+  (if (and (seq? args) (= 4 (count args)))
+    (let [in (first args)
+          out (second args)
+          n  (Integer. (re-find #"[0-9*]" (nth args 2)))
+          category (nth args 3)]
+      (do
+         (println "OK\n")
+         (out/mcq-xml n in out category)))
+    (println
+      "Use the REPL to generate questions!\n"
+      "Or give the following args in this order to generate MCQ tests: \n"
+      "  in  - name of the file with semi-questions,\n"
+      "  out - name of output file (Moodle-XML),\n"
+      "  n   - number of tests generated from one semi-question,\n"
+      "  cat - Moodle category of this questions.\n")))
 
-(defn contra2-quiz "Model - contradictory formulae." [n]
-  (out/mcq-separate n "contra2.clj" "contra.xml" "formula/model/contra2"))
-
-(defn valid2-quiz "Model - valid formulae." [n]
-  (out/mcq-separate n "valid2.clj" "valid.xml" "formula/model/valid2"))
-
-(defn sat2-quiz "Model - satisfiable formulae." [n]
-  (out/mcq-separate n "sat2.clj" "sat.xml" "formula/model/sat2"))
-
-(defn contra2G-quiz "Model - contradictory set of formulae." [n]
-  (out/mcq-separate n "contG22.clj" "contraG.xml" "formula/model/contra-set2"))
-
-(defn sat2G-quiz "Model - satisfiable set of formulae." [n]
-  (out/mcq-separate n "satG22.clj" "satG.xml" "formula/model/sat-set2"))
-
-(defn lc1a-quiz "Model - logical consequence of a formula." [n]
-  (out/mcq-separate n "lc1a.clj" "lc1a.xml" "formula/model/lc1a"))
-
-(defn lc1b-quiz "Model - logical consequence of a something." [n]
-  (out/mcq-separate n "lc1b.clj" "lc1b.xml" "formula/model/lc1b"))
-
-(defn lc2-quiz "Model - logical consequence of a formula." [n]
-  (out/mcq-separate n "lc2.clj" "lc2.xml" "formula/model/lc2"))
-
-(defn modelA2-quiz "Model - model of a formula with 2 variables." [n]
-  (out/mcq-separate n "model2.clj" "modelA2.xml" "formula/model/modelA2"))
-
-(defn modelA3-quiz "Model - model of a formula with 3 variables." [n]
-  (out/mcq-separate n "model3.clj" "modelA3.xml" "formula/model/modelA3"))
-
-(defn modelG4-quiz "Model - model of a formula set with 4 variables." [n]
-  (out/mcq-separate n "model4.clj" "modelG4.xml" "formula/model/modelG4"))
-
-(defn -main []
-  (println "Use the REPL to generate questions!"))

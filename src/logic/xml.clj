@@ -4,27 +4,39 @@
   (:use hiccup.core)
   (:gen-class))
 
-(defn cdata "put HTML code into the text of the question" [& args]
+(defn cdata 
+  "Put HTML code into the text of the question.
+  Arg: strings" 
+  [& args]
   (str "<![CDATA[" (apply str args) "]]>"))
 
-(defn category "generate category part for Moodle XML"
+(defn category 
+  "Generate category part for Moodle XML.
+  Arg: a string"
   [cat]
   (html
     [:question {:type "category"}
       [:category [:text (str "$course$/" cat)]]]))
 
-(defn head "first lines of a Moodle XML file"
+(defn head 
+  "First lines of a Moodle XML file.
+  Args: 
+   cat - category (string)
+   filename - name of the output"
   [cat filename]
   (do
     (spit filename "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<quiz>")
    (spit filename (category cat) :append true)))
 
-(defn tail "last line of a Moodle XML file" [filename]
+(defn tail 
+  "Last line of a Moodle XML file.
+  Arg: filename - the output file"
+  [filename]
   (spit filename "</quiz>" :append true))
 
-(defn common-part "Dont repeat yourself!
-                   We collected in one place which is common
-                   in all type of tests."
+(defn common-part 
+  "Dont repeat yourself!
+  We collected in one place which is common in all type of tests."
   []
   (html [:defaultgrade "1.000"]
     [:penalty "0.33"]       ;; not used
@@ -39,7 +51,13 @@
 
 ;; ### Matching questions
 
-(defn matching-questions   "XML part of a matching question"
+(defn matching-questions 
+  "XML part of a matching question.
+  Args:
+   id - question id
+   question - text of the question
+   answer - text of subquestions and their answers
+   feedback-text - general feedback"
   [id question answers feedback-text]
   (html [:question {:type "matching"}
          [:name [:text id]]
@@ -54,7 +72,13 @@
             [:text (cdata "\\(" v "\\)")]  ; an expression for MathJax!
             [:answer [:text (str (inc cnt))]]])]))
 
-(defn matching-problems "A whole Moodle XML file with matching questions"
+(defn matching-problems 
+  "A whole Moodle XML file with matching questions.
+  Args: 
+   n - number of questions
+   filename - output file
+   cat - category
+   func - function to generate questions"
   [n filename cat func]
   (do
     (head cat filename)
@@ -66,24 +90,39 @@
     (tail filename)))
 
 ;; ### Multiple Choice Question
-;; #### Global feedback
-;; At some problems it is better if we have one global feedback for the whole question.
+;; Common approach - uniform function for the case we have general feedback, 
+;; or we haven't; we have feedback for each answer, or we haven't.
 
-(defn multi-general "XML part of a MCQ question with general feedback"
-  [id question feedback answers]
+(defn mcq-question 
+  "text of MCQ question in XML format.
+  Args:
+   id - id of the question
+   question - text of the question
+   answers - pair/triplets of points, answers and feedbacks
+   feedback - general feedback (inside a one-element list, if exists at all)"
+
+  [id question answers & feedback]
   (html [:question {:type "multichoice"}
          [:name [:text id]]
          [:questiontext {:format "html"} [:text (cdata question)]]
-         [:generalfeedback {:format "html"} [:text (cdata feedback)]]
+         [:generalfeedback {:format "html"} 
+           [:text (when feedback (cdata (first feedback)))]]
          [:single "false"]
          [:answernumbering "abc"]
          (common-part)
          (for [x answers]
           [:answer {:fraction (second x) :format "html"}
             [:text (cdata (first x))]
-            [:feedback {:format "html"} [:text]]])]))
+            [:feedback {:format "html"} 
+              [:text (when (= (count x) 3) (cdata (nth x 2)))]]])]))
 
-(defn mcq-general "Whole Moodle XML file with MCQ questions, general feedback"
+(defn mcq-xml 
+  "Whole Moodle XML file with MCQ questions.
+  Args:
+   n - number of questions
+   filename - output file
+   cat - category
+   func - function to generate questions"
   [n filename cat func]
   (do
     (head cat filename)
@@ -93,48 +132,18 @@
           (if (nil? all)
             (recur i)
             (let [[q a id fb] all]
-              (spit filename (multi-general id q fb a) :append true)
-              (recur (inc i)))))))
-    (tail filename)))
-
-;; #### Separated feedback
-;;
-;; In some cases better, if we give feedback for each (bad) answers.
-
-(defn multi-separate "XML part of a MCQ tests with separated feedback"
-  [id question answers]
-  (html [:question {:type "multichoice"}
-         [:name [:text id]]
-         [:questiontext {:format "html"} [:text (cdata question)]]
-         [:generalfeedback {:format "html"} [:text]]
-         [:single "false"]
-         [:answernumbering "abc"]
-         (common-part)
-         (for [x answers]
-          ;(print x)
-          [:answer {:fraction (second x) :format "html"}
-            [:text (cdata (first x))]
-            [:feedback {:format "html"}
-             [:text (when (= (count x) 3)
-                      (cdata (nth x 2)))]]])]))
-
-
-(defn mcq-separate "Whole Moodle XML file with MCQ questions, separated feedback"
-  [n filename cat func]
-  (do
-    (head cat filename)
-    (loop [i 0]
-      (when (< i n)
-        (let [all (func i)]
-          (if (nil? all)
-            (recur i)
-            (let [[q a id] all]
-              (spit filename (multi-separate id q a) :append true)
+              (spit filename (mcq-question id q a fb) :append true)
               (recur (inc i)))))))
     (tail filename)))
 
 ;; ### Short answer
-(defn short-answer "XML part of a short-answer question"
+(defn short-answer 
+  "XML part of a short-answer question
+  Args:
+   id - id of the question
+   question - text of the question 
+   answer - the uniq (good) answer
+   feedback - the solution or a hint"
   [id question answer feedback]
   (html [:question {:type "shortanswer"}
           [:name [:text id]]
@@ -148,7 +157,13 @@
             [:text (cdata answer)]
             [:feedback {:format "html"} [:text]]]]))
 
-(defn short-quiz "A whole Moodle XML file with short-answer questions"
+(defn short-quiz 
+  "A whole Moodle XML file with short-answer questions.
+  Args: 
+   n - number of questions
+   filename - output file
+   category - category of the questions
+   func - function to generate questions"
   [n filename category func]
   (do
     (head category filename)
