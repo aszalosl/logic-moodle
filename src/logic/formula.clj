@@ -601,8 +601,10 @@
 (defn sub-quiz "generate a semi-question for a quiz about subformulae"
   [f full]
   (str " {:question \"A felsoroltak közül melyek részformulái a \\( "
-       ((if full write-full write-short) f)
-       " \\) formulának?\"\n  :good [\n"
+       ((if full write-full write-short) f) 
+       " \\) formulának?\"\n"
+       (when-not full (str "  :feedback \"Az eredeti formula: \\( " (write-full f) "\\) \"\n")) 
+       "  :good [\n"
        (s/join
          (map #(str "    \"\\( " % " \\)\"\n") (subformulae f full)))
        "  ]\n  :wrong []}\n"))

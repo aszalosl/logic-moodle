@@ -31,7 +31,9 @@
 ;; well formed formulae
 (comment (out/mcq-xml-res 30 "wff.clj" "WFF.xml" "formula/wff1"))
 ;; subformulae of a formula
+;; needs a lot of human work to give the bad answers and their feedback
 (comment (out/mcq-xml-res 7 "subform.clj" "SF1.xml" "formula/subformula1"))
+(comment (out/mcq-xml-res 20 "subformM.clj" "SF1.xml" "formula-min/subformula1"))
 ;; contradictory formulae
 (comment (out/mcq-xml-res 100 "contra2.clj" "contra.xml" "formula/model/contra2"))
 (comment (out/mcq-xml-res 100 "contra2m.clj" "contra.xml" "formula-min/model/contra2"))
