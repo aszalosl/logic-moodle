@@ -2,11 +2,16 @@
 ;;;; All the other files are tools, implement some type of tests.
 
 (ns logic.core
-  (:require [logic.set :as sets])
-  (:require [logic.relation :as rels])
-  (:require [logic.outer :as out])
-  (:require [logic.xml :as xml])
-  (:require [logic.formula :as form])
+  (:require [logic.set :as sets]
+            [logic.relation :as rels]
+            [logic.outer :as out]
+            [logic.xml :as xml]
+            [logic.quine-table :as qt]
+            [logic.subformula :as sf]
+            [logic.random-formula :as rf]
+            [logic.model-quiz :as mq]
+            [logic.consequence :as lc]
+            [logic.formula :as form])
   (:gen-class))
 
 
@@ -18,12 +23,12 @@
 ;; properties of a random relation
 (comment (xml/mcq-xml 50 "RP1.xml" "relacio/level1" rels/relation-problem))
 ;; main column of Quine tables
-(comment (xml/short-xml 20 "quine1.xml" "formula/quine1" form/quine-test1a))
-(comment (xml/short-xml 20 "quine1m.xml" "formula-min/quine1" form/quine-test1b))
-(comment (xml/short-xml 50 "quine2.xml" "formula/quine2" form/quine-test2a))
-(comment (xml/short-xml 50 "quine2m.xml" "formula-min/quine2" form/quine-test2b))
-(comment (xml/short-xml 50 "quine3.xml" "formula/quine3" form/quine-test3a))
-(comment (xml/short-xml 50 "quine3m.xml" "formula-min/quine3" form/quine-test3b))
+(comment (xml/short-xml 20 "quine1.xml" "formula/quine1" qt/quine-test1a))
+(comment (xml/short-xml 20 "quine1m.xml" "formula-min/quine1" qt/quine-test1b))
+(comment (xml/short-xml 50 "quine2.xml" "formula/quine2" qt/quine-test2a))
+(comment (xml/short-xml 50 "quine2m.xml" "formula-min/quine2" qt/quine-test2b))
+(comment (xml/short-xml 50 "quine3.xml" "formula/quine3" qt/quine-test3a))
+(comment (xml/short-xml 50 "quine3m.xml" "formula-min/quine3" qt/quine-test3b))
 
 ;; ### Generate test from semi questions
 ;; inductive definitions
@@ -68,39 +73,39 @@
 (comment (out/mcq-xml-res 7 "model4m.clj" "modelG4m.xml" "formula-min/model/modelG4"))
 ;; ### Generate semi questions
 ;; model of a formula
-(comment (doseq [row (range 0 4)] (spit "model2.clj" (form/model-semi-questions-formulae 4 2 15 row true) :append true)))
-(comment (doseq [row (range 0 4)] (spit "model2m.clj" (form/model-semi-questions-formulae 4 2 15 row false) :append true)))
-(comment (doseq [row (range 0 16)] (spit "model4.clj" (form/model-semi-questions-sets 5 4 30 row true) :append true)))
-(comment (doseq [row (range 0 16)] (spit "model4m.clj" (form/model-semi-questions-sets 5 4 30 row false) :append true)))
-(comment (spit "contra2.clj" (form/cont-semi-question2 true)))
-(comment (spit "contra2m.clj" (form/cont-semi-question2 false)))
-(comment (spit "valid2.clj" (form/valid-quiz2 true)))
-(comment (spit "valid2m.clj" (form/valid-quiz2 false)))
-(comment (spit "sat2.clj" (form/sat-quiz2 true)))
-(comment (spit "sat2m.clj" (form/sat-quiz2 false)))
-(comment (spit "lc1a.clj" (form/logic_conseq true)))
-(comment (spit "lc1am.clj" (form/logic_conseq false)))
-(comment (spit "lc1b.clj" (form/logic_conseq2 true)))
-(comment (spit "lc1bm.clj" (form/logic_conseq2 false)))
+(comment (doseq [row (range 0 4)] (spit "model2.clj" (mq/model-semi-questions-formulae 4 2 15 row true) :append true)))
+(comment (doseq [row (range 0 4)] (spit "model2m.clj" (mq/model-semi-questions-formulae 4 2 15 row false) :append true)))
+(comment (doseq [row (range 0 16)] (spit "model4.clj" (mq/model-semi-questions-sets 5 4 30 row true) :append true)))
+(comment (doseq [row (range 0 16)] (spit "model4m.clj" (mq/model-semi-questions-sets 5 4 30 row false) :append true)))
+(comment (spit "contra2.clj" (lc/cont-semi-question2 true)))
+(comment (spit "contra2m.clj" (lc/cont-semi-question2 false)))
+(comment (spit "valid2.clj" (lc/valid-quiz2 true)))
+(comment (spit "valid2m.clj" (lc/valid-quiz2 false)))
+(comment (spit "sat2.clj" (lc/sat-quiz2 true)))
+(comment (spit "sat2m.clj" (lc/sat-quiz2 false)))
+(comment (spit "lc1a.clj" (lc/logic_conseq true)))
+(comment (spit "lc1am.clj" (lc/logic_conseq false)))
+(comment (spit "lc1b.clj" (lc/logic_conseq2 true)))
+(comment (spit "lc1bm.clj" (lc/logic_conseq2 false)))
 (comment (spit "contG22.clj"
-           (form/make-quiz2 #(= 0 (bit-and %1 %2))
+           (lc/make-quiz2 #(= 0 (bit-and %1 %2))
              "Jelölje meg a kielégíthetetlen formulahalmazokat!" true)))
 (comment (spit "contG22m.clj"
-           (form/make-quiz2 #(= 0 (bit-and %1 %2))
+           (lc/make-quiz2 #(= 0 (bit-and %1 %2))
              "Jelölje meg a kielégíthetetlen formulahalmazokat!" false)))
 (comment (spit "satG22.clj"
-           (form/make-quiz2 #(not= 0 (bit-and %1 %2))
+           (lc/make-quiz2 #(not= 0 (bit-and %1 %2))
              "Jelölje meg a kielégíthetető formulahalmazokat!" true)))
 (comment (spit "satG22m.clj"
-           (form/make-quiz2 #(not= 0 (bit-and %1 %2))
+           (lc/make-quiz2 #(not= 0 (bit-and %1 %2))
              "Jelölje meg a kielégíthetető formulahalmazokat!" false)))
-(comment (spit "lc2.clj" (form/logic_conseq3 true)))
-(comment (spit "lc2m.clj" (form/logic_conseq3 false)))
-(comment (form/to-file 50
-                  (fn [] (form/sub-quiz (form/random-formula 7 [:p :q :r]) true))
+(comment (spit "lc2.clj" (lc/logic_conseq3 true)))
+(comment (spit "lc2m.clj" (lc/logic_conseq3 false)))
+(comment (sf/to-file 50
+                  (fn [] (sf/sub-quiz (rf/random-formula 7 [:p :q :r]) true))
                   "subform.clj"))
-(comment (form/to-file 50
-                  (fn [] (form/sub-quiz (form/random-formula 7 [:p :q :r]) false))
+(comment (sf/to-file 50
+                  (fn [] (sf/sub-quiz (rf/random-formula 7 [:p :q :r]) false))
                   "subformM.clj"))
 
 (defn -main
