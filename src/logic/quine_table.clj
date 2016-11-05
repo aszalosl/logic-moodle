@@ -93,7 +93,7 @@
 ;; * code(T) = 2r1111111111111111 = 65635
 
 (defn code4
-  "Code of a formula with 3 variable
+  "Code of a formula with 4 variable
   Arg: formula"
   [f]
   (code f {:p 65280, :q 61680, :r 52428, :s 42690 :t 65635}))

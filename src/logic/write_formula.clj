@@ -53,6 +53,28 @@
               (str w1 wop w2)))))
     (case e :p "p", :q "q" :r "r", :s "s", :t "t", :u "u"))))
 
+(defn write-out
+  "MathJax compatible string of an expression into datafile
+  Args:
+   e - expression as a vector
+   outer - operator outside this formula
+   before - this operator was before the this one"
+  ([e] (write-out e 0 true))
+  ([e outer before]
+    (if (vector? e)
+      (let [op (first e)]
+        (if (= :not op)
+          (str "\\\\lnot " (write-out (second e) :not false))
+          (let [wop (case op :imp "\\\\supset " :and "\\\\land "
+                      :or "\\\\lor " :equ "\\\\equiv ")
+                w1 (write-out (second e) op true)
+                w2 (write-out (nth e 2) op false)]
+            (if (or (some #(= [outer op] %) precedence)
+                    (and (= outer op) before)) ; right associativity
+              (str "(" w1 wop w2 ")" )
+              (str w1 wop w2)))))
+    (case e :p "p", :q "q" :r "r", :s "s", :t "t", :u "u"))))
+
 (comment (write-full [:and [:and :p :p] :p]))
 (comment (write-full [:and [:and :p [:not :p]] [:and :p [:not :q]]]))
 (comment (write-short [:and :p [:and :p :p]]))

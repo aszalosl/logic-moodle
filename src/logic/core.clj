@@ -11,6 +11,7 @@
             [logic.random-formula :as rf]
             [logic.model-quiz :as mq]
             [logic.consequence :as lc]
+            [logic.map :as lm]
             [logic.formula :as form])
   (:gen-class))
 
@@ -29,6 +30,12 @@
 (comment (xml/short-xml 50 "quine2m.xml" "formula-min/quine2" qt/quine-test2b))
 (comment (xml/short-xml 50 "quine3.xml" "formula/quine3" qt/quine-test3a))
 (comment (xml/short-xml 50 "quine3m.xml" "formula-min/quine3" qt/quine-test3b))
+;;DNF
+(comment (xml/mcq-xml 50 "dnf2.xml" "formula-min/dnf-knf/dnf2" lm/dnf3))
+(comment (xml/mcq-xml 50 "dnf3.xml" "formula-min/dnf-knf/dnf3" lm/km3-dnf))
+(comment (xml/mcq-xml 50 "dnf4.xml" "formula-min/dnf-knf/dnf4" lm/km4-dnf))
+
+
 
 ;; ### Generate test from semi questions
 ;; inductive definitions
@@ -71,6 +78,11 @@
 ;;  model of a set of formulae with 4 variables
 (comment (out/mcq-xml-res 7 "model4.clj" "modelG4.xml" "formula/model/modelG4"))
 (comment (out/mcq-xml-res 7 "model4m.clj" "modelG4m.xml" "formula-min/model/modelG4"))
+;; DNF-CNF
+;; minterms, maxterms
+(comment (out/mcq-xml-res 9 "cdnf.clj" "dnf1.xml" "formula-min/dnf-knf/dnf1"))
+(comment (out/mcq-xml-res 9 "cknf.clj" "cnf1.xml" "formula-min/dnf-knf/cnf1"))
+
 ;; ### Generate semi questions
 ;; model of a formula
 (comment (doseq [row (range 0 4)] (spit "model2.clj" (mq/model-semi-questions-formulae 4 2 15 row true) :append true)))

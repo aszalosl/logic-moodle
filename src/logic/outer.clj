@@ -33,9 +33,12 @@
                           (shuffle (q :wrong)))]
     (concat
       (for [x good-answers] [x (nth cmn/prize some-good)])
-      (for [y bad-answers] [(first y)
-                            (nth cmn/penalty some-good)
-                            (second y)]))))
+      (for [y bad-answers] (if (vector? y)
+                             [(first y)
+                              (nth cmn/penalty some-good)
+                              (second y)]
+                             [y
+                              (nth cmn/penalty some-good)])))))
 
 (defn generate-problem
   "Generate the parts of the questions.
