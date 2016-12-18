@@ -51,8 +51,8 @@
    full - write all the paren.? (bool)"
   [length vars formulae row full]
   (let [fs (for [i (range 0 formulae)]
-             (rf/random-formula length
-               (case vars 1 [:p], 2 [:p :q], 3 [:p :q :r], 4 [:p :q :r :s])))
+    (rf/random-formula0 length
+      (case vars 1 [:p], 2 [:p :q], 3 [:p :q :r], 4 [:p :q :r :s])))
         pred (case vars 1 qt/code1, 2 qt/code2, 3 qt/code3, 4 qt/code4)
         good (filterv #(not= 0 (bit-and (f/** 2 row) (pred %))) fs)
         bad (filterv #(= 0 (bit-and (f/** 2 row) (pred %))) fs)]
@@ -84,8 +84,8 @@
   [length vars sets row full]
   (let [variables (case vars 1 [:p], 2 [:p :q], 3 [:p :q :r], 4 [:p :q :r :s])
         fs (for [i (range 0 sets)]
-             [ (rf/random-formula length variables)
-               (rf/random-formula length variables)])
+                [ (rf/random-formula0 length variables)
+                  (rf/random-formula0 length variables)])
         pred (case vars 1 qt/code1, 2 qt/code2, 3 qt/code3, 4 qt/code4)
         good (filterv
                #(not= 0 (bit-and (f/** 2 row) (pred (first %)) (pred (second %))))
@@ -93,31 +93,35 @@
         bad (filterv
                #(= 0 (bit-and (f/** 2 row) (pred (first %)) (pred (second %))))
                fs)]
-    (str " {:question \"" (model-set-question vars row) "\"\n"
-         "  :good [\n"
-         (s/join (for [a good]
-                   (str "         \"\\(\\{ "
-                        (if full (wf/write-full (first a)) (wf/write-short (first a)))
-                        ", "
-                        (if full (wf/write-full (second a)) (wf/write-short (second a)))
-                        " \\}\\)\"\n")))
-         "]\n  :wrong [\n"
-         (s/join (for [b bad]
-                   (str "          [\"\\(\\{ "
-                        (if full (wf/write-full (first b)) (wf/write-short (first b))) ","
-                        (if full (wf/write-full (second b)) (wf/write-short (second b)))
-                        " \\}\\)\" \""
-                        (when-not full
-                          (str "az eredeti formulák: \\("
-                               (wf/write-full (first b))
-                               "\\) és \\("
-                               (wf/write-full (second b))
-                               "\\)<br>" ))
-                        "az igazságtáblák főoszlopai: "
-                        (qt/truth-table-main-column (pred (first b)) (f/** 2 vars))
-                        " és "
-                        (qt/truth-table-main-column (pred (second b)) (f/** 2 vars))
-                        "\"]\n")))
-         "]}\n\n")))
+    (str
+      " {:question \"" (model-set-question vars row) "\"\n"
+      "  :good [\n"
+      (s/join (for [a good]
+                (str
+                  "         \"\\(\\{ "
+                  (if full (wf/write-full (first a)) (wf/write-short (first a)))
+                  ", "
+                  (if full (wf/write-full (second a)) (wf/write-short (second a)))
+                  " \\}\\)\"\n")))
+      "]\n  :wrong [\n"
+      (s/join (for [b bad]
+                (str
+                  "          [\"\\(\\{ "
+                  (if full (wf/write-full (first b)) (wf/write-short (first b))) ","
+                  (if full (wf/write-full (second b)) (wf/write-short (second b)))
+                  " \\}\\)\" \""
+                  (when-not full
+                    (str
+                      "az eredeti formulák: \\("
+                      (wf/write-full (first b))
+                      "\\) és \\("
+                      (wf/write-full (second b))
+                      "\\)<br>"))
+                      "az igazságtáblák főoszlopai: "
+                      (qt/truth-table-main-column (pred (first b)) (f/** 2 vars))
+                      " és "
+                      (qt/truth-table-main-column (pred (second b)) (f/** 2 vars))
+                      "\"]\n")))
+      "]}\n\n")))
 
 

@@ -12,7 +12,9 @@
             [logic.model-quiz :as mq]
             [logic.consequence :as lc]
             [logic.map :as lm]
-            [logic.formula :as form])
+            [logic.formula :as form]
+            [logic.free :as fr]
+            [logic.congruence :as cng])
   (:gen-class))
 
 
@@ -35,6 +37,13 @@
 (comment (xml/mcq-xml 50 "dnf3.xml" "formula-min/dnf-knf/dnf3" lm/km3-dnf))
 (comment (xml/mcq-xml 50 "dnf4.xml" "formula-min/dnf-knf/dnf4" lm/km4-dnf))
 
+;;Free and bounded variables
+(comment (xml/mcq-xml 50 "free1.xml" "formula/firstorder/free1" fr/free1))
+(comment (xml/mcq-xml 50 "bound1.xml" "formula/firstorder/bound1" fr/bound1))
+(comment (xml/mcq-xml 50 "free2.xml" "formula/firstorder/free2" fr/occur1))
+(comment (xml/mcq-xml 50 "bound2.xml" "formula/firstorder/bound2" fr/occur2))
+
+(comment (xml/mcq-xml 50 "subs1.xml" "formula/firstorder/substitute1" cng/subs1))
 
 
 ;; ### Generate test from semi questions
@@ -82,6 +91,7 @@
 ;; minterms, maxterms
 (comment (out/mcq-xml-res 9 "cdnf.clj" "dnf1.xml" "formula-min/dnf-knf/dnf1"))
 (comment (out/mcq-xml-res 9 "cknf.clj" "cnf1.xml" "formula-min/dnf-knf/cnf1"))
+(comment (out/mcq-xml-res 50 "clean.clj" "clean.xml" "formula/firstorder/clean"))
 
 ;; ### Generate semi questions
 ;; model of a formula
@@ -114,11 +124,12 @@
 (comment (spit "lc2.clj" (lc/logic_conseq3 true)))
 (comment (spit "lc2m.clj" (lc/logic_conseq3 false)))
 (comment (sf/to-file 50
-                  (fn [] (sf/sub-quiz (rf/random-formula 7 [:p :q :r]) true))
+                  (fn [] (sf/sub-quiz (rf/random-formula0 7 [:p :q :r]) true))
                   "subform.clj"))
 (comment (sf/to-file 50
-                  (fn [] (sf/sub-quiz (rf/random-formula 7 [:p :q :r]) false))
+                  (fn [] (sf/sub-quiz (rf/random-formula0 7 [:p :q :r]) false))
                   "subformM.clj"))
+(comment (spit "clean.clj" (clean-quiz 50 7 5)) )
 
 (defn -main
   "Generate questions from MCQ semi-question file.
@@ -131,7 +142,7 @@
   (if (and (seq? args) (= 4 (count args)))
     (let [in (first args)
           out (second args)
-          n  (Integer. (re-find #"[0-9*]" (nth args 2)))
+          n  (Integer. (re-find #"[0-9]*" (nth args 2)))
           category (nth args 3)]
       (do
          (println "OK\n")

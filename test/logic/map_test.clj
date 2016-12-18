@@ -12,7 +12,7 @@
   (is (= 0 (diff-implicants [0] [0])))
   (is (= 1000 (diff-implicants [:x] [1])))
   (is (= 1 (diff-implicants [0 1 :x 0] [0 1 :x 1])))
-  (is (= 1 (diff-implicants [1 1 1] [0 1 1]))) )
+  (is (= 1 (diff-implicants [1 1 1] [0 1 1]))))
 
 (deftest combine-implicants-test
   (is (= [:x] (combine-implicants [1] [0])))

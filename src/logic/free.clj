@@ -27,16 +27,17 @@
   [e]
   (if (vector? e)
     (let [op (first e)
-          se (second e)]
+          e1 (get e 1)
+          e2 (get e 2)]
       (condp = op
-        :f (free-var se)
-        :P (free-var se)
-        :g (s/union (free-var se) (free-var (nth e 2)))
-        :Q (s/union (free-var se) (free-var (nth e 2)))
-        :not (free-var se)
-        :all (s/difference (free-var (nth e 2)) (set [se]))
-        :ex  (s/difference (free-var (nth e 2)) (set [se]))
-        (s/union (free-var se) (free-var (nth e 2)))))
+        :f (free-var e1)
+        :P (free-var e1)
+        :g (s/union (free-var e1) (free-var e2))
+        :Q (s/union (free-var e1) (free-var e2))
+        :not (free-var e1)
+        :all (s/difference (free-var e2) (set [e1]))
+        :ex  (s/difference (free-var e2) (set [e1]))
+        (s/union (free-var e1) (free-var e2))))
     (case e :c #{} :d #{} :x #{:x} :y #{:y} :z #{:z} :u #{:u} :v #{:v} :w #{:w})))
 
 (defn bound-var
@@ -132,15 +133,15 @@
       (contains? #{:f :P :not} (first t))
       (let [[t1 c1] (var-walk (second t) c)]
         [[(first t) t1] c1])
-      (contains? 
-        #{:g :Q :or :and :imp :equ :all :ex :eq} 
+      (contains?
+        #{:g :Q :or :and :imp :equ :all :ex :eq}
         (first t))
       (let [[t1 c1] (var-walk (second t) c)
             [t2 c2] (var-walk (nth t 2) c1)]
         [[(first t) t1 t2] c2]))
-    (if (contains? #{:x :y :z :u :v :w} t) 
+    (if (contains? #{:x :y :z :u :v :w} t)
       [{:name t, :id c} (inc c)]
-      [t c])))  
+      [t c]))) 
 
 (defn bound-walk
   "add boundness information to variables"
@@ -173,12 +174,16 @@
   f - formula
   is - indices"
   [f is]
-  (for [pair (map-indexed vector f)] 
+  (for [pair (map-indexed vector f)]
     (if (contains? #{\x \y \z \u \v \w \t \s } (second pair))
       (str (second pair) (first pair))
       (second pair))))
 
 (defn write-term
+  "Add indices to variables, to able refer them in the questions.
+  Args:
+  e - expression (term)
+  vars - list of variables"
   [e vars]
   (if (vector? e)
     (if (= :f (first e))
@@ -186,7 +191,7 @@
       (str "g("
            (write-term (second e) vars) ","
            (write-term (nth e 2) vars) ")"))
-    (cond 
+    (cond
       (= e :c) "c"
       (= e :d) "d"
       :else
@@ -198,6 +203,12 @@
           (str v))))))
 
 (defn write-indexed
+  "Add indices to formula - written in short way.
+  Args:
+  e - expression (formula)
+  outer - connective at outer level (needs parenthesis, or not)
+  before - boolean (we are before the operator of previous level, or not)
+  vars - list of variables"
   [e outer before vars]
   (if (vector? e)
     (let [op (first e)
@@ -226,7 +237,7 @@
   i - id of the question
   f - formula of the question"
   [i f]
-  (let [[f1 n] (var-walk f 0)         ; count the variables inside 
+  (let [[f1 n] (var-walk f 0)         ; count the variables inside
         f2 (bound-walk f1 #{})        ; take care of boundness/freeness
         rand-nums (sort (take 4 (shuffle (range n))))  ; take 4 random indices
         variables (filter map? (flatten f2)) ; select the vars with these indices
@@ -244,7 +255,7 @@
                  (if (get v :bounded) (nth cmn/penalty fr) (nth cmn/prize fr))])]
             [q a id]))))
 
-(defn occur1 [i] 
+(defn occur1 [i]
   (let [f (r/random-formula1 7 3)]
       (free-occurences i f)))
 
@@ -254,7 +265,7 @@
   i - id of the question
   f - formula of the question"
   [i f]
-  (let [[f1 n] (var-walk f 0)         ; count the variables inside 
+  (let [[f1 n] (var-walk f 0)         ; count the variables inside
         f2 (bound-walk f1 #{})        ; take care of boundness/freeness
         rand-nums (sort (take 4 (shuffle (range n))))  ; take 4 random indices
         variables (filter map? (flatten f2)) ; select the vars with these indices
@@ -272,7 +283,7 @@
                  (if (get v :bounded) (nth cmn/prize fr) (nth cmn/penalty fr))])]
             [q a id]))))
 
-(defn occur2 [i] 
+(defn occur2 [i]
   (let [f (r/random-formula1 7 3)]
       (bounded-occurences i f)))
 

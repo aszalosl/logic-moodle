@@ -71,7 +71,7 @@
 (defn covers
   "Set of consequences of prime implicant `xs` from set of prime implicants `css`."
   [xs css]
-   (filter #(hide? % xs) css))
+  (filter #(hide? % xs) css))
 
 (defn to-binary
   "Convert a natural number `n` into a binary vector of length `size`."
@@ -188,7 +188,7 @@
   `term` and `normal-form` are words conjunctive/disjunktive;
   `pf`, `g` and `h` are functions to write the terms, and generate good and wrong answers."
   [vars term normal-form pf g h]
-  (let [f (rf/random-formula 5 (vec (take vars [:p :q :r :s :t]))),
+  (let [f (rf/random-formula0 5 (vec (take vars [:p :q :r :s :t]))),
         code (qt/code3 f)
         mc (qt/truth-table-main-column code (f/** 2 vars))
         good (g code vars)
@@ -229,7 +229,7 @@
 (defn- str-truth-table
   "String representation of a main column of a formula with code `c` with length `n`."
   [c n]
-  (str "az igazságtáblázat főoszlopa: \\( " (qt/truth-table-main-column c n) " \\)" ))
+  (str "az igazságtáblázat főoszlopa: \\( " (qt/truth-table-main-column c n) " \\)"))
 
 (defn- similar-codes
   "Given a code `c`, find similar codes, which are differs in a bit;
@@ -245,7 +245,7 @@
   where `id` identifier of the generated question,
   "
   [id kmf id-str nf-str]
-  (let [f (rf/random-formula 5 [:p :q :r])
+  (let [f (rf/random-formula0 5 [:p :q :r])
         p (count (qt/parameters f))
         code0 (qt/code3 f)]
     (if (and (= p 3) (< 0 code0 255))
@@ -259,9 +259,9 @@
                    "\\) formulának az alábbiak közül melyik a "
                    nf-str " alakja?"),
             a [[nf0 100.00] [nf1 -33.3333 fb1]
-               [nf2 -33.3333 fb2][nf3 -33.3333 fb3]] ]
+               [nf2 -33.3333 fb2][nf3 -33.3333 fb3]]]
          [q a i fb0])
-       nil)))
+      nil)))
 
 (defn dnf3
   "dnf question with 3 variables"
@@ -361,4 +361,4 @@
   [id]
   (km3-nf id km-cnf "CNF" "CNF3-"))
 
-;; vim : fdm=syntax
+;; vim: fdm=syntax

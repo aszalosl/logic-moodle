@@ -16,7 +16,7 @@
         (cs/union s1 (parameters (nth f 2)))))
     (set [f])))
 
-(comment (parameters (rf/random-formula 6 [:p :q])))
+(comment (parameters (rf/random-formula0 6 [:p :q])))
 
 
 ;; ### Quine truth table problems
@@ -142,13 +142,13 @@
 
 ;; only one paramter: the id of the question
 ;; difference in size, and in full/short formula
-(defn quine-test1a [i] (quine-test [:p] (rf/random-formula 3 [:p]) true i))
-(defn quine-test1b [i] (quine-test [:p] (rf/random-formula 3 [:p]) false i))
+(defn quine-test1a [i] (quine-test [:p] (rf/random-formula0 3 [:p]) true i))
+(defn quine-test1b [i] (quine-test [:p] (rf/random-formula0 3 [:p]) false i))
 
-(defn quine-test2a [i] (quine-test [:p :q] (rf/random-formula 4 [:p :q]) true i))
-(defn quine-test2b [i] (quine-test [:p :q] (rf/random-formula 4 [:p :q]) false i))
+(defn quine-test2a [i] (quine-test [:p :q] (rf/random-formula0 4 [:p :q]) true i))
+(defn quine-test2b [i] (quine-test [:p :q] (rf/random-formula0 4 [:p :q]) false i))
 
-(defn quine-test3a [i] (quine-test [:p :q :r] (rf/random-formula 5 [:p :q :r]) true i))
-(defn quine-test3b [i] (quine-test [:p :q :r] (rf/random-formula 5 [:p :q :r]) false i))
+(defn quine-test3a [i] (quine-test [:p :q :r] (rf/random-formula0 5 [:p :q :r]) true i))
+(defn quine-test3b [i] (quine-test [:p :q :r] (rf/random-formula0 5 [:p :q :r]) false i))
 
 

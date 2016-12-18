@@ -1,6 +1,7 @@
 (ns logic.congruence
   (:require [logic.write-formula :as w]
             [logic.random-formula :as r]
+            [logic.free :as f]
             [logic.common :as cmn]
             [clojure.set :as s])
   (:gen-class))
@@ -71,8 +72,7 @@
         vs
         (conj vs t))
       #{})))
-
-
+      
 (defn subs?
   "Can we substitutute t instead of x in f?
   Returns the problematic parameter.
@@ -121,8 +121,9 @@
         fxt (substitute f x t)]
     (if (= a #{})
       [q (nth cmn/prize c) (str "A helyettesítés eredménye: \\(" (w/write-short fxt) "\\)")]
-      [q (nth cmn/penalty c) (str "A helyettesítés során a \\(" (w/write-term (first a)) "\\) kötötté válna")])))
-
+      [q (nth cmn/penalty c) (str "A helyettesítés során a \\(" 
+                               (w/write-term (first a))
+                               "\\) kötötté válna")])))
 
 (defn subs-test
   "Generate a random formula and several substitutions, 
@@ -151,8 +152,94 @@
             (< 0 sc)
             (or (.contains (flatten f) :ex) (.contains (flatten f) :all)))
       (let [q (str "Az alábbiak közül melyik esetben megengedett a behelyettesítés, ahol A a következő formula \\(" (w/write-short f) "\\)?")
-            a [(generate-answer f x1 t1 sc) (generate-answer f x2 t2 sc) (generate-answer f x3 t3 sc) (generate-answer f x4 t4 sc)]
+            a [(generate-answer f x1 t1 sc) 
+               (generate-answer f x2 t2 sc) 
+               (generate-answer f x3 t3 sc) 
+               (generate-answer f x4 t4 sc)]
             id (str "SUB1-" i)]
         [q a id]))))
 
 (defn subs1 [i] (subs-test i 5 4 4))
+
+;; quantifier clean formula (applies necessary renaming for prenex form)
+
+(defn map-join
+  "Update with multiplicity"
+  [m1 m2]
+  (loop [m m1, result m2]
+    (if (empty? m)
+      result
+      (let [k (key (first m))
+            v (get (first m) 1)]
+        (if (contains? result k)
+          (recur (rest m) (update result k + v))
+          (recur (rest m) (into result {k v})))))))
+
+(defn bound-var-multi
+  "map of bound variables in formula f"
+  [f]
+  (if (vector? f)
+    (let [op (first f)
+          f1 (get f 1)
+          f2 (get f 2)]
+      (cond
+        (contains? #{:f :P :g :Q} op) {}
+        (= :not op) (bound-var-multi f1)
+        (contains? #{:all :ex} op)
+        (let [bv (bound-var-multi f2)]
+          (if (contains? bv f1)
+            (update bv f1 inc)
+            (into bv {f1 1})))
+        (contains? #{:or :and :imp :equ :eq} op)
+        (let [b1 (bound-var-multi f1)
+              b2 (bound-var-multi f2)]
+          (map-join b1 b2))))
+    {}))
+
+(defn clean?
+  "the formula f is clean in its variables?"
+  [ff]
+  (let [free-vars (f/free-var ff)
+        bound-multi (bound-var-multi ff)
+        bound-vars (set (keys bound-multi))]
+    (and
+      (= (s/intersection free-vars bound-vars) #{})
+      (every? #(= 1 %) (vals bound-multi)))))
+
+(defn clean-problem
+  "some hint about problems"
+  [ff]
+  (let [free-vars (f/free-var ff)
+        bound-multi (bound-var-multi ff)
+        bound-vars (set (keys bound-multi))
+        inter (s/intersection free-vars bound-vars)
+        multi (filter #(not= 1 (val %)) bound-multi)]
+    (if (not= inter #{})
+      (str "a(z) "(w/write-term (first inter)) 
+        " változónak vannak mind szabad, mind kötött előfordulásai is")
+      (when (not (empty? multi))
+        (str "a(z) " (w/write-term (key (first multi))) " változó " 
+          (val (first multi)) " kvantornak változója")))))
+
+(defn clean-quiz
+  "Generate semi-questions about clean-ness
+  Args:
+   n - number of formulae
+   f1 - random formula parameter
+   f2 - random formula parameter"
+  [n f1 f2]
+  (str " {:question \"Válassza ki az alábbiak közül a változóiban tiszta "
+       "formulákat!\"\n  :good [\n"
+       (clojure.string/join
+         (for [x (range 0 n) 
+               :let [ff (r/random-formula1 f1 f2)] 
+               :when (clean? ff)]
+           (str "         \"\\\\( " (w/write-out ff) " \\\\)\"\n")))
+       "  ]\n  :wrong [\n"
+       (clojure.string/join  
+         (for [y (range 0 n) 
+               :let [ff (r/random-formula1 f1 f2)] 
+               :when (not (clean? ff))]
+           (str "          [\"\\\\( " (w/write-out ff) " \\\\)\" \""
+             (clean-problem ff) "\"]\n")))    
+        "]}\n"))
