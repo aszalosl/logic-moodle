@@ -130,7 +130,7 @@
                   (fn [] (sf/sub-quiz (rf/random-formula0 7 [:p :q :r]) false))
                   "subformM.clj"))
 (comment (spit "clean.clj" (clean-quiz 50 7 5)) )
-
+(comment (sf/to-file 26 (fn [] (prenex-quiz (r/random-formula-prenex 7 4))) "prenex.clj"))
 (defn -main
   "Generate questions from MCQ semi-question file.
   Args:

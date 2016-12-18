@@ -13,7 +13,7 @@
         (if (= :f (first e)) ; only 2 options: f,g
           (str "f(" (write-term (second e)) ")")
           (str "g(" (write-term (second e)) "," (write-term (nth e 2)) ")"))
-        (case e :x "x" :y "y" :z "z" :c "c" :d "d" :u "u" :v "v" :w "w")))
+        (case e :x "x" :y "y" :z "z" :c "c" :d "d" :u "u" :v "v" :w "w" :t "t" :s "s")))
 
 ;; ### Naive representation with all the parentheses.
 

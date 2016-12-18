@@ -7,33 +7,6 @@
   (:gen-class))
 
 ;; congruent formulae
-(defn binding-walk
-  [e bs c]
-  "Add information about bindings.
-  Args:
-  e - expression (formula/term)
-  bs - list of bindings
-  c - counter"
-  (if (vector? e)
-    (let [op (first e)
-          e1 (get e 1)
-          e2 (get e 2)]
-      (cond
-        (contains? #{:f :P :not} op)
-        (let [[be c1] (binding-walk e1 bs c)]
-          [[op be] c1])
-        (contains? #{:g :Q :or :and :imp :equ :eq} op)
-        (let [[b1 c1] (binding-walk e1 bs c)
-              [b2 c2] (binding-walk e2 bs c1)]
-          [[op b1 b2] c2])
-        (contains? #{:all :ex} op)
-        (let [bs1 (assoc bs e1 c)
-              [b2 c2] (binding-walk e2 bs1 (inc c))]
-          [[op {:name e1, :id c} b2] c2])))
-    (if (some #(= e %) (keys bs))
-      [{:bound (get bs e), :name e } c]
-      [{:name e, :bind (keys bs)} c])))
-
 (defn bindings
   "Free variables and their environments.
   Args:
@@ -120,7 +93,8 @@
         a (subs? f x t)
         fxt (substitute f x t)]
     (if (= a #{})
-      [q (nth cmn/prize c) (str "A helyettesítés eredménye: \\(" (w/write-short fxt) "\\)")]
+      [q (nth cmn/prize c) (str "A helyettesítés eredménye: \\(" 
+                             (w/write-short fxt) "\\)")]
       [q (nth cmn/penalty c) (str "A helyettesítés során a \\(" 
                                (w/write-term (first a))
                                "\\) kötötté válna")])))
@@ -151,7 +125,9 @@
     (when (and
             (< 0 sc)
             (or (.contains (flatten f) :ex) (.contains (flatten f) :all)))
-      (let [q (str "Az alábbiak közül melyik esetben megengedett a behelyettesítés, ahol A a következő formula \\(" (w/write-short f) "\\)?")
+      (let [q (str "Az alábbiak közül melyik esetben megengedett a "
+                   "behelyettesítés, ahol A a következő formula \\(" 
+                   (w/write-short f) "\\)?")
             a [(generate-answer f x1 t1 sc) 
                (generate-answer f x2 t2 sc) 
                (generate-answer f x3 t3 sc) 
@@ -161,7 +137,7 @@
 
 (defn subs1 [i] (subs-test i 5 4 4))
 
-;; quantifier clean formula (applies necessary renaming for prenex form)
+;; quantifier clean formula (renaming is unnecessary renaming for prenex form?)
 
 (defn map-join
   "Update with multiplicity"
@@ -243,3 +219,143 @@
            (str "          [\"\\\\( " (w/write-out ff) " \\\\)\" \""
              (clean-problem ff) "\"]\n")))    
         "]}\n"))
+        
+;; prenex form
+(defn calculate-bindings
+  "Determine the necessary renamings for a formula based on its free and 
+  bounded variables.
+  Args:
+  free-vars - free variables of the formula
+  bound-multi - multiplicities of the bound variables"
+  [free-vars bound-multi]
+  (loop [bs {}, bounded bound-multi, ax-vars [:u :v :w :t :s]]
+    (if (empty? bounded)
+      bs
+      (let [k (key (first bounded))
+            v (val (first bounded))]
+        (if (contains? free-vars k)
+          (recur 
+            (into bs {k (vec (take v ax-vars))}) 
+            (rest bounded)
+            (vec (drop v ax-vars)))
+          (if (> v 1)
+            (recur 
+              (into bs {k (conj (vec (take (dec v) ax-vars)) k)}) 
+              (rest bounded)
+              (vec (drop v ax-vars)))
+            (recur bs (rest bounded) ax-vars)))))))
+
+(defn quantifier?
+  "We have two quantifiers"
+  [q]
+  (or (= q :all) (= q :ex)))
+
+(defn cleaning
+  "Generate a variable-clean format for formula.
+  Args:
+  frm - formula
+  fb - future bindings
+  ab - actual bindings"
+  [frm fb ab]
+  (if (vector? frm)
+    (let [op (first frm)
+          f1 (get frm 1)
+          f2 (get frm 2)]
+      (cond
+        (contains? #{:f :P :not} op)
+        (let [[fc1 c1] (cleaning f1 fb ab)]
+          [[op fc1] c1])
+          
+        (contains? #{:g :Q :eq :or :and :imp :equ} op) 
+        (let [[fc1 c1] (cleaning f1 fb ab) 
+              [fc2 c2] (cleaning f2 fb c1)]
+          [[op fc1 fc2] c2])
+          
+        (quantifier? op)
+        (if (contains? fb f1)
+          (let [x (first (get fb f1 f1))
+                xs (vec (rest (get fb f1)))
+                fbn (assoc fb f1 xs)
+                abn (assoc ab f1 x)
+                [fc2 c2] (cleaning f2 fbn abn)]
+            [[op x fc2] c2])
+          (let [[fc2 c2] (cleaning f2 fb ab)]
+            [[op f1 fc2] c2]))))
+    (if (contains? ab frm) 
+      [(ab frm) ab]
+      [frm ab])))
+      
+(defn converse
+  "The other quantifier"
+  [op]
+  (case op :all :ex :ex :all))
+
+(defn begins-with-quantifier?
+  [frm]
+  (if (vector? frm)
+     (quantifier? (first frm))
+     false))
+
+(defn prenex-form
+  "Construct some prenex form of the formula frm"
+  [frm]
+  (if (vector? frm) 
+    (let [op (first frm)
+          f1 (get frm 1)
+          pf1 (prenex-form f1)
+          q1 (begins-with-quantifier? pf1)
+          f2 (get frm 2)
+          pf2 (prenex-form f2)
+          q2 (begins-with-quantifier? pf2)]   
+      (cond
+        (contains? #{:P :Q :eq :f :g} op) frm
+        
+        (= op :not) 
+        (if q1
+          [(converse (first pf1)) (second pf1) (prenex-form [:not (get pf1 2)])]
+          [:not pf1])
+          
+        (contains? #{:and :or} op) 
+        (cond 
+          (and q1 q2)
+            (if (< (rand) 0.5)
+               [(first pf1) (second pf1) (prenex-form [op (get pf1 2) pf2])]
+               [(first pf2) (second pf2) (prenex-form [op pf1 (get pf2 2)])])
+          q1 [(first pf1) (second pf1) (prenex-form [op (get pf1 2) pf2])]
+          q2 [(first pf2) (second pf2) (prenex-form [op pf1 (get pf2 2)])]
+          :else [op pf1 pf2])
+        
+        (= op :imp) 
+        (cond 
+          (and q1 q2)
+            (if (< (rand) 0.5)
+               [(converse (first pf1)) (second pf1) (prenex-form [op (get pf1 2) pf2])]
+               [(first pf2) (second pf2) (prenex-form [op pf1 (get pf2 2)])])
+          q1 [(converse (first pf1)) (second pf1) (prenex-form [op (get pf1 2) pf2])]
+          q2 [(first pf2) (second pf2) (prenex-form [op pf1 (get pf2 2)])]
+          :else [op pf1 pf2])
+        
+        (contains? #{:all :ex} op) [op f1 pf2]))
+      frm))
+      
+(defn clean
+  [frm]
+  (let [free-vars (f/free-var frm)
+        bound-multi (bound-var-multi frm)
+        fb (calculate-bindings free-vars bound-multi)]
+    (cleaning frm fb {})))
+    
+(defn prenex-quiz 
+  "generate a semi-question for a quiz about prenex-form"
+  [frm]
+  (let [[f1 c] (clean frm)]
+    (str " {:question \"A felsoroltak közül melyek részformulái a \\\\( "
+      (w/write-out frm) 
+      " \\\\) formulának?\"\n"
+      "  :good [\n"
+      (clojure.string/join
+        (for [x (range 0 10)]     
+         (str "    \"\\\\( " (w/write-out (prenex-form f1)) " \\\\)\"\n")))
+       "  ]\n  :wrong []}\n")))
+
+; (defn prenex-quiz1 [] (prenex-quiz (r/random-formula-prenex 7 4)))

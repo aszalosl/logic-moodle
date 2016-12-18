@@ -82,3 +82,24 @@
               l2 (- l l1 1)]
           [op (random-formula1 l1 lt)
               (random-formula1 l2 lt)])))))
+              
+(defn random-formula-prenex
+  "Generate a random formula with
+  Args:
+  l - number of connectives
+  lt - complexity of terms"
+  [l lt]
+  (if (= 0 l)
+    (case (rand-int 3)
+      0 (equality lt)
+      1 (p1 lt)
+      2 (p2 lt))
+    (let [op (rand-nth [:not :imp :and :or :all :ex])]
+      (condp = op
+        :not [:not (random-formula-prenex (dec l) lt)]
+        :all [:all (rand-nth [:x :y :z]) (random-formula-prenex (dec l) lt)]
+        :ex [:ex (rand-nth [:x :y :z]) (random-formula-prenex (dec l) lt)]
+        (let [l1 (rand-int l)
+              l2 (- l l1 1)]
+          [op (random-formula-prenex l1 lt)
+              (random-formula-prenex l2 lt)])))))
