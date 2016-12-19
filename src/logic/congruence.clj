@@ -263,28 +263,29 @@
           f2 (get frm 2)]
       (cond
         (contains? #{:f :P :not} op)
-        (let [[fc1 c1] (cleaning f1 fb ab)]
-          [[op fc1] c1])
+        (let [[fc1 b1] (cleaning f1 fb ab)]
+          [[op fc1] b1])
           
         (contains? #{:g :Q :eq :or :and :imp :equ} op) 
-        (let [[fc1 c1] (cleaning f1 fb ab) 
-              [fc2 c2] (cleaning f2 fb c1)]
-          [[op fc1 fc2] c2])
+        (let [[fc1 b1] (cleaning f1 fb ab) 
+              [fc2 b2] (cleaning f2 b1 ab)]
+          [[op fc1 fc2] b2])
           
         (quantifier? op)
         (if (contains? fb f1)
-          (let [x (first (get fb f1 f1))
+          (let [x (first (get fb f1))
                 xs (vec (rest (get fb f1)))
                 fbn (assoc fb f1 xs)
                 abn (assoc ab f1 x)
-                [fc2 c2] (cleaning f2 fbn abn)]
-            [[op x fc2] c2])
-          (let [[fc2 c2] (cleaning f2 fb ab)]
-            [[op f1 fc2] c2]))))
+                [fc2 b2] (cleaning f2 fbn abn)]
+            [[op x fc2] b2])
+          (let [[fc2 b2] (cleaning f2 fb ab)]
+            [[op f1 fc2] b2]))))
     (if (contains? ab frm) 
-      [(ab frm) ab]
-      [frm ab])))
-      
+      [(ab frm) fb]
+      [frm fb])))
+
+;       
 (defn converse
   "The other quantifier"
   [op]
@@ -354,7 +355,7 @@
       " \\\\) formulának?\"\n"
       "  :good [\n"
       (clojure.string/join
-        (for [x (range 0 10)]     
+        (for [x (range 0 5)]     
          (str "    \"\\\\( " (w/write-out (prenex-form f1)) " \\\\)\"\n")))
        "  ]\n  :wrong []}\n")))
 
