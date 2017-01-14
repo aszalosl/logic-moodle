@@ -1,6 +1,18 @@
+# skip class files
+target
 *.class
+
+# skip Windows files describes the content of files
 Descript.ion
+
+# skip the files of the editor
 .idea
+clojure-logic-moodle.iml
+
+# skip the generated examples and their tests
 exam
+Makefile
+
+# skip the lein files
 .lein-repl-history
 .nrepl-port

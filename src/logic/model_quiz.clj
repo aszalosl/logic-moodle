@@ -47,30 +47,34 @@
    length - operators in the random formula ~ length of it
    vars - number of parameters/variables
    formula - number of generated formulae
-   row - id of the interpreation
+   row - id of the interpreation (determines the values of the variables)
    full - write all the paren.? (bool)"
   [length vars formulae row full]
-  (let [fs (for [i (range 0 formulae)]
-    (rf/random-formula0 length
-      (case vars 1 [:p], 2 [:p :q], 3 [:p :q :r], 4 [:p :q :r :s])))
+  (let [variables (case vars 1 [:p], 2 [:p :q], 3 [:p :q :r], 4 [:p :q :r :s])
+        fs (for [i (range 0 formulae)]
+             (rf/random-formula0 length variables))
         pred (case vars 1 qt/code1, 2 qt/code2, 3 qt/code3, 4 qt/code4)
-        good (filterv #(not= 0 (bit-and (f/** 2 row) (pred %))) fs)
-        bad (filterv #(= 0 (bit-and (f/** 2 row) (pred %))) fs)]
+        func (fn [z] (bit-and (f/** 2 row) (pred z)))
+        good (filterv #(not= 0 (func %)) fs)
+        bad (filterv #(= 0 (func %)) fs)]
     (str " {:question \"" (model-formula-question vars row) "\"\n"
          "  :good [\n"
-         (s/join (for [a good]
-                   (str "         \"\\( "
-                        (if full (wf/write-full a) (wf/write-short a))
-                        " \\)\"\n")))
+         (s/join
+           (for [a good]
+             (str "         \"\\( "
+                  (if full (wf/write-full a) (wf/write-short a))
+                  ;": " (qt/truth-table-main-column (pred a) (f/** 2 vars)) ; testing result
+                  " \\)\"\n")))
          "]\n  :wrong [\n"
-         (s/join (for [b bad]
-                   (str "          [\"\\( "
-                        (if full (wf/write-full b) (wf/write-short b))
-                        " \\)\" \""
-                        (when-not full
-                          (str "az eredeti formula: \\(" (wf/write-full b) "\\)<br>"))
-                        "az igazságtábla főoszlopa: "
-                        (qt/truth-table-main-column (pred b) (f/** 2 vars)) "\"]\n")))
+         (s/join
+           (for [b bad]
+             (str "          [\"\\( "
+                  (if full (wf/write-full b) (wf/write-short b))
+                  " \\)\" \""
+                  (when-not full
+                    (str "az eredeti formula: \\(" (wf/write-full b) "\\)<br>"))
+                  "az igazságtábla főoszlopa: "
+                  (qt/truth-table-main-column (pred b) (f/** 2 vars)) "\"]\n")))
          "]}\n\n")))
 
 (defn model-semi-questions-sets
@@ -84,15 +88,12 @@
   [length vars sets row full]
   (let [variables (case vars 1 [:p], 2 [:p :q], 3 [:p :q :r], 4 [:p :q :r :s])
         fs (for [i (range 0 sets)]
-                [ (rf/random-formula0 length variables)
-                  (rf/random-formula0 length variables)])
+             [(rf/random-formula0 length variables)
+              (rf/random-formula0 length variables)])
         pred (case vars 1 qt/code1, 2 qt/code2, 3 qt/code3, 4 qt/code4)
-        good (filterv
-               #(not= 0 (bit-and (f/** 2 row) (pred (first %)) (pred (second %))))
-                fs)
-        bad (filterv
-               #(= 0 (bit-and (f/** 2 row) (pred (first %)) (pred (second %))))
-               fs)]
+        func #(bit-and (f/** 2 row) (pred (first %)) (pred (second %)))
+        good (filterv #(not= 0 (func %)) fs)
+        bad (filterv #(= 0 (func %)) fs)]
     (str
       " {:question \"" (model-set-question vars row) "\"\n"
       "  :good [\n"
@@ -102,6 +103,8 @@
                   (if full (wf/write-full (first a)) (wf/write-short (first a)))
                   ", "
                   (if full (wf/write-full (second a)) (wf/write-short (second a)))
+                  ;": " (qt/truth-table-main-column (pred (first a)) (f/** 2 vars))
+                  ;"+" (qt/truth-table-main-column (pred (second a)) (f/** 2 vars))
                   " \\}\\)\"\n")))
       "]\n  :wrong [\n"
       (s/join (for [b bad]
@@ -117,11 +120,11 @@
                       "\\) és \\("
                       (wf/write-full (second b))
                       "\\)<br>"))
-                      "az igazságtáblák főoszlopai: "
-                      (qt/truth-table-main-column (pred (first b)) (f/** 2 vars))
-                      " és "
-                      (qt/truth-table-main-column (pred (second b)) (f/** 2 vars))
-                      "\"]\n")))
+                  "az igazságtáblák főoszlopai: "
+                  (qt/truth-table-main-column (pred (first b)) (f/** 2 vars))
+                  " és "
+                  (qt/truth-table-main-column (pred (second b)) (f/** 2 vars))
+                  "\"]\n")))
       "]}\n\n")))
 
 
