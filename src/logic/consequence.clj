@@ -155,15 +155,15 @@
        "]}\n"))
 
 
-(defn logic_conseq3 
+(defn logic_conseq3
   "Generate a semi-questions about logical consequence of formulae"
   [full]
   (s/join
     (for [i (range 0 16) j (range 0 16) :when (< i j)]
       (str " {:question \"Jelölje meg a \\( \\{"
-           ((if full wf/write-full wf/write-short) (rand-nth (equ-class2 i))) 
+           ((if full wf/write-full wf/write-short) (rand-nth (equ-class2 i)))
            "\\), \\("
-           ((if full wf/write-full wf/write-short) (rand-nth (equ-class2 j))) 
+           ((if full wf/write-full wf/write-short) (rand-nth (equ-class2 j)))
            "\\} "
            " \\) formulahalmaz logikai következményeit!\"\n  :good [\n"
            (s/join (for [k (range 0 16) :when (= 0 (bit-and i j (- 15 k)))]
@@ -173,12 +173,10 @@
            (for [l (range 0 4) k (range 0 16)
                   :when (not= 0 (bit-and i j (- 15 k)))]
              (str
-               "            [\"\\( " 
-               ((if full wf/write-full wf/write-short) (rand-nth (equ-class2 j))) 
+               "            [\"\\( "
+               ((if full wf/write-full wf/write-short) (rand-nth (equ-class2 k)))
                " \\)\""
                " \"a konklúzió igazságtáblájának főoszlopa: " (qt/ttmc2 k)
                ", míg a hipotézisek igazságtábláinak főoszlopai " (qt/ttmc2 i)
                " és " (qt/ttmc2 j) " \"]\n")))
          "]}\n"))))
-
-
