@@ -91,6 +91,7 @@
 ;; minterms, maxterms
 (comment (out/mcq-xml-res 9 "cdnf.clj" "dnf1.xml" "formula-min/dnf-knf/dnf1"))
 (comment (out/mcq-xml-res 9 "cknf.clj" "cnf1.xml" "formula-min/dnf-knf/cnf1"))
+
 (comment (out/mcq-xml-res 50 "clean.clj" "clean.xml" "formula/firstorder/clean"))
 
 ;; ### Generate semi questions
@@ -117,10 +118,10 @@
              "Jelölje meg a kielégíthetetlen formulahalmazokat!" false)))
 (comment (spit "satG22.clj"
            (lc/make-quiz2 #(not= 0 (bit-and %1 %2))
-             "Jelölje meg a kielégíthetető formulahalmazokat!" true)))
+             "Jelölje meg a kielégíthető formulahalmazokat!" true)))
 (comment (spit "satG22m.clj"
            (lc/make-quiz2 #(not= 0 (bit-and %1 %2))
-             "Jelölje meg a kielégíthetető formulahalmazokat!" false)))
+             "Jelölje meg a kielégíthető formulahalmazokat!" false)))
 (comment (spit "lc2.clj" (lc/logic_conseq3 true)))
 (comment (spit "lc2m.clj" (lc/logic_conseq3 false)))
 (comment (sf/to-file 50
@@ -154,4 +155,3 @@
       "  out - name of output file (Moodle-XML),\n"
       "  n   - number of tests generated from one semi-question,\n"
       "  cat - Moodle category of this questions.\n")))
-
