@@ -96,7 +96,7 @@
   "Code of a formula with 4 variable
   Arg: formula"
   [f]
-  (code f {:p 65280, :q 61680, :r 52428, :s 42690 :t 65635}))
+  (code f {:p 65280, :q 61680, :r 52428, :s 43690 :t 65635}))
 
 (defn truth-table-main-column
   "Convert from radix 10 to binary with a fixed length.
