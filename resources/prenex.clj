@@ -3,7 +3,7 @@
     "\\( \\exists x\\forall y(\\lnot P(y)\\land \\lnot (\\lnot \\lnot P(f(g(y,x)))\\supset c=x)) \\)"
     "\\( \\exists x\\forall y(\\lnot P(y)\\land \\lnot (P(f(g(y,x)))\\supset c=x)) \\)"
     "\\( \\exists u\\forall y(\\lnot P(y)\\land \\lnot (\\lnot \\lnot P(f(g(y,u)))\\supset c=u)) \\)"
-    "\\( \\exists x\\forall z(\\lnot P(z)\\land \\lnot (\\lnot \\lnot P(f(g(y,x)))\\supset c=x)) \\)"]
+    "\\( \\exists x\\forall z(\\lnot P(z)\\land \\lnot (\\lnot \\lnot P(f(g(z,x)))\\supset c=x)) \\)"]
   :wrong [
     ["\\( \\forall y\\exists x(\\lnot P(y)\\land \\lnot (\\lnot \\lnot P(f(g(y,x)))\\supset c=x)) \\)"
      "különböző kvantorok felcserélése nem ekvivalens átalakítás"]
@@ -31,9 +31,9 @@
     "\\( \\exists u\\exists v\\lnot ((Q(d,u)\\land x=c)\\land P(v)) \\)"]
   :wrong [
     ["\\( \\forall z\\exists v\\exists w\\exists t\\lnot ((Q(d,u)\\land x=c)\\land P(v)) \\)"
-     "az eredeti formula zárt volt, ez már nem az"]
-    ["\\( \\forall z\\exists u\\exists v\\exists w\\exists t\\lnot ((Q(d,u)\\land x=c)\\land P(v)) \\)"
-     "az eredeti formula zárt volt, ez már nem az"]]}
+     "az eredeti formulában csak egy szabad változó volt, itt már kettő van"]
+    ["\\( \\forall z\\exists u\\exists v\\exists w\\exists t\\lnot ((Q(d,u)\\land u=c)\\land P(v)) \\)"
+     "az eredeti formula nem volt zárt, ez már az"]]}
  
  {:question "A felsoroltak közül melyek prenex alakjai a \\( \\forall z(P(c)\\lor ((x=d\\supset c=y)\\supset \\exists z((\\exists zd=c\\supset Q(d,f(d)))\\lor y=c))) \\) formulának?"
   :good [
@@ -99,8 +99,8 @@
   :wrong [
     ["\\( \\forall x\\forall y\\lnot (((Q(g(c,y),d)\\supset P(y))\\supset Q(c,x))\\lor (Q(d,d)\\supset Q(y,f(d)))\\land P(d)) \\)"
      "az eredeti formulában az y-nak volt szabad előfordulása, itt nincs"]
-    ["\\( \\forall x\\forall u\\lnot (((Q(g(c,y),d)\\supset P(y))\\supset Q(c,x))\\lor (Q(d,d)\\supset Q(u,f(d)))\\land P(d)) \\)"
-     "az eredeti formulában az u-nak nem volt szabad előfordulása, itt van"]
+    ["\\( \\forall x\\forall u\\lnot (((Q(g(c,y),d)\\supset P(y))\\supset Q(c,x))\\lor (Q(d,d)\\supset Q(u,f(d)))\\land P(d)) \\)" 
+     "megváltoztak a kötési viszonyok (y)"]
     ["\\( \\forall u\\lnot (((Q(g(c,u),d)\\supset P(u))\\supset Q(c,x))\\lor (Q(d,d)\\supset Q(y,f(d)))\\land P(d)) \\)"
      "az eredeti formulában az x-nek nem volt szabad előfordulása, itt van"]]}
      
@@ -126,7 +126,9 @@
     "\\( \\forall u\\exists z\\lnot (((Q(y,u)\\lor (Q(y,d)\\supset P(f(f(y)))))\\lor P(d))\\lor P(d)\\lor y=c) \\)"]
   :wrong [
     ["\\( \\forall y\\lnot (((Q(y,x)\\lor (Q(y,d)\\supset P(f(f(y)))))\\lor P(d))\\lor P(d)\\lor y=c) \\)"
-     "az eredeti formulában az y-nek volt szabad előfordulása, itt nincs"]]}
+     "az eredeti formulában az y-nek volt szabad előfordulása, itt nincs"]
+    ["\\( \\lnot \\exists y (((Q(y,x)\\lor (Q(y,d)\\supset P(f(f(y)))))\\lor P(d))\\lor P(d)\\lor y=c) \\)"
+     "negációval nem kezdődhet prenex alak"]]}
 
   {:question "A felsoroltak közül melyek prenex alakjai a \\( \\exists y\\forall y\\forall y(\\exists y(Q(x,c)\\supset \\forall yQ(d,c))\\supset \\forall zP(x)) \\) formulának?"
   :good [
@@ -143,7 +145,9 @@
     ["\\( \\exists u\\forall v\\forall w\\forall t\\exists x\\forall z((Q(x,c)\\supset Q(d,c))\\supset P(x)) \\)"
      "az eredeti formulában az x-nek volt szabad előfordulása, itt nincs"]
     ["\\( \\exists u\\forall t\\forall w\\forall v\\exists x\\forall z((Q(x,c)\\supset Q(d,c))\\supset P(x)) \\)"
-     "az eredeti formulában az x-nek volt szabad előfordulása, itt nincs"]]}
+     "az eredeti formulában az x-nek volt szabad előfordulása, itt nincs"]
+    ["\\( \\exists u\\forall t\\forall w\\forall v\\exists y\\forall z(Q(x,c)\\supset Q(d,c))\\supset P(x) \\)"
+     "ez egy implikáció, mely előtagjában szerepel kvantor"]]}
 
   {:question "A felsoroltak közül melyek prenex alakjai a \\( \\forall zP(d)\\supset \\lnot \\forall x\\lnot \\exists x\\exists y(Q(y,g(c,c))\\supset Q(d,g(d,x))) \\) formulának?"
   :good [
@@ -168,7 +172,7 @@
     ["\\( \\exists v\\forall y\\forall u((Q(c,x)\\lor f(x)=z)\\lor (P(d)\\land (f(x)=x\\lor Q(y,d))\\supset P(d))) \\)"
      "az eredeti formulában az y-nak volt szabad előfordulása, itt nincs"]
     ["\\( \\exists v\\forall x\\forall u((Q(c,x)\\lor f(x)=z)\\lor (P(d)\\land (f(x)=x\\lor Q(y,d))\\supset P(d))) \\)"
-     "az eredeti formulában az y-nak volt szabad előfordulása, itt nincs"]]}
+     "az eredeti formulában az x-nek volt szabad előfordulása, itt nincs"]]}
 
   {:question "A felsoroltak közül melyek prenex alakjai a \\( \\exists z\\exists y(\\lnot \\lnot \\exists z(P(c)\\supset Q(y,d))\\land \\lnot c=d) \\) formulának?"
   :good [
@@ -224,7 +228,7 @@
   :wrong [
     ["\\( \\forall z\\forall u\\exists x(((\\lnot P(d)\\lor Q(d,y)\\land P(f(g(y,y))))\\land Q(y,c))\\land Q(c,x)) \\)"
      "eredetileg az x-nek volt szabad előfordulása, itt már nincs"]
-    ["\\( \\forall z\\forall u\\exists w(((\\lnot P(d)\\lor Q(d,y)\\land P(f(g(y,y))))\\land Q(y,c))\\land Q(c,x)) \\)"
+    ["\\( \\forall z\\forall y\\exists w(((\\lnot P(d)\\lor Q(d,y)\\land P(f(g(y,y))))\\land Q(y,c))\\land Q(c,x)) \\)"
      "eredetileg az y-nak volt szabad előfordulása, itt már nincs"]]}
 
   {:question "A felsoroltak közül melyek prenex alakjai a \\( z=d\\land \\exists y\\forall x\\forall z(Q(x,y)\\land (\\lnot Q(g(d,c),c)\\supset \\lnot y=f(c))) \\) formulának?"
@@ -235,7 +239,7 @@
     "\\( \\exists y\\forall x\\forall v(z=d\\land Q(x,y)\\land (\\lnot Q(g(d,c),c)\\supset \\lnot y=f(c))) \\)"
     "\\( \\exists v\\forall x\\forall u(z=d\\land Q(x,v)\\land (\\lnot Q(g(d,c),c)\\supset \\lnot y=f(c))) \\)"]
   :wrong [
-    ["\\( \\exists y\\forall x\\forall u(z=d\\land Q(x,y)\\land (\\lnot Q(g(d,c),c)\\supset \\lnot y=f(c))) \\)"
+    ["\\( \\exists y\\forall x\\forall z(z=d\\land Q(x,y)\\land (\\lnot Q(g(d,c),c)\\supset \\lnot y=f(c))) \\)"
      "eredetileg a z-nek volt szabad előfordulása, itt már nincs"]
     ["\\( \\forall x\\exists y\\forall u(z=d\\land Q(x,y)\\land (\\lnot Q(g(d,c),c)\\supset \\lnot y=f(c))) \\)"
      "a különböző típusú kvantorok felcserélése nem ekvivalens átalakítás"]]}
@@ -245,7 +249,7 @@
     "\\( \\exists y\\forall u\\exists v(\\lnot (y=c\\land (P(v)\\supset v=y\\land Q(v,c)))\\supset P(x)) \\)"
     "\\( \\exists y\\exists v(\\lnot (y=c\\land (P(v)\\supset v=y\\land Q(v,c)))\\supset P(x)) \\)"
     "\\( \\exists v\\forall u\\exists y(\\lnot (y=c\\land (P(v)\\supset v=y\\land Q(v,c)))\\supset P(x)) \\)"
-    "\\( \\exists y\\exists u(\\lnot (y=c\\land (P(u)\\supset u=y\\land Q(ue,c)))\\supset P(x)) \\)"]
+    "\\( \\exists y\\exists u(\\lnot (y=c\\land (P(u)\\supset u=y\\land Q(u,c)))\\supset P(x)) \\)"]
   :wrong [
     ["\\( \\exists y\\forall u\\exists x(\\lnot (y=c\\land (P(x)\\supset x=y\\land Q(v,c)))\\supset P(x)) \\)"
      "eredetileg az x-nek volt szabad előfordulása, itt már nincs"]
