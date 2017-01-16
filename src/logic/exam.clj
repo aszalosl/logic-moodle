@@ -10,7 +10,7 @@
             [logic.consequence :as lc]
             [logic.map :as lm]
             [logic.formula :as form]
-           [logic.free :as fr]
+            [logic.free :as fr]
             [logic.congruence :as cng])
   (:gen-class))
 (do
