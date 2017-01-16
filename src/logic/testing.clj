@@ -31,3 +31,6 @@
             (s/join (map print-problem (read-string (slurp in))))
             "\\end{document}" )))
 
+(if (= 3 (count *command-line-args*))
+  (write-problems (second *command-line-args*) (nth *command-line-args* 2))
+  (println *command-line-args*))

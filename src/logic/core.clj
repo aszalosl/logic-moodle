@@ -94,6 +94,8 @@
 
 (comment (out/mcq-xml-res 50 "clean.clj" "clean.xml" "formula/firstorder/clean"))
 
+(comment (out/mcq-xml-res 5 "prenex.clj" "prenex.xml" "formula/firstorder/prenex" ))
+
 ;; ### Generate semi questions
 ;; model of a formula
 (comment (doseq [row (range 0 4)] (spit "model2.clj" (mq/model-semi-questions-formulae 4 2 15 row true) :append true)))
