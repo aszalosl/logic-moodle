@@ -16,3 +16,6 @@ Makefile
 # skip the lein files
 .lein-repl-history
 .nrepl-port
+
+# skip generated.output
+*.xml

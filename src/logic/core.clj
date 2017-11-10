@@ -14,6 +14,7 @@
             [logic.map :as lm]
             [logic.formula :as form]
             [logic.free :as fr]
+            [logic.sequent :as sc]
             [logic.congruence :as cng])
   (:gen-class))
 
@@ -53,31 +54,31 @@
 (comment (out/mcq-xml-res 30 "wff.clj" "WFF.xml" "formula/wff1"))
 ;; subformulae of a formula
 ;; needs a lot of human work to give the bad answers and their feedback
-(comment (out/mcq-xml-res 7 "subform.clj" "SF1.xml" "formula/subformula1"))
+(comment (out/mcq-xml-res 7 "subform.clj" "SF10.xml" "formula/subformula1"))
 (comment (out/mcq-xml-res 20 "subformM.clj" "SF1.xml" "formula-min/subformula1"))
 ;; contradictory formulae
-(comment (out/mcq-xml-res 100 "contra2.clj" "contra.xml" "formula/model/contra2"))
+(comment (out/mcq-xml-res 100 "contra2.clj" "contra0.xml" "formula/model/contra2"))
 (comment (out/mcq-xml-res 100 "contra2m.clj" "contra.xml" "formula-min/model/contra2"))
 ;; valid formulae
-(comment (out/mcq-xml-res 100 "valid2.clj" "valid.xml" "formula/model/valid2"))
+(comment (out/mcq-xml-res 100 "valid2.clj" "valid0.xml" "formula/model/valid2"))
 (comment (out/mcq-xml-res 100 "valid2m.clj" "valid.xml" "formula-min/model/valid2"))
 ;; satifiable formulae
-(comment (out/mcq-xml-res 100 "sat2.clj" "sat.xml" "formula/model/sat2"))
+(comment (out/mcq-xml-res 100 "sat2.clj" "sat0.xml" "formula/model/sat2"))
 (comment (out/mcq-xml-res 100 "sat2m.clj" "sat.xml" "formula-min/model/sat2"))
 ;; contradictory set of formulae
-(comment (out/mcq-xml-res 100 "contG22.clj" "contraG.xml" "formula/model/contra-set2"))
+(comment (out/mcq-xml-res 100 "contG22.clj" "contraG0.xml" "formula/model/contra-set2"))
 (comment (out/mcq-xml-res 100 "contG22m.clj" "contraG.xml" "formula-min/model/contra-set2"))
 ;; satifiable set of formulae
-(comment (out/mcq-xml-res 100 "satG22.clj" "satG.xml" "formula/model/sat-set2"))
+(comment (out/mcq-xml-res 100 "satG22.clj" "satG0.xml" "formula/model/sat-set2"))
 (comment (out/mcq-xml-res 100 "satG22m.clj" "satG.xml" "formula-min/model/sat-set2"))
 ;;  logical consequence of a formula
-(comment (out/mcq-xml-res 7 "lc1a.clj" "lc1a.xml" "formula/model/lc1a"))
+(comment (out/mcq-xml-res 7 "lc1a.clj" "lc1a0.xml" "formula/model/lc1a"))
 (comment (out/mcq-xml-res 7 "lc1am.clj" "lc1a.xml" "formula-min/model/lc1a"))
 ;; logical consequence of something
-(comment (out/mcq-xml-res 7 "lc1b.clj" "lc1b.xml" "formula/model/lc1b"))
+(comment (out/mcq-xml-res 7 "lc1b.clj" "lc1b0.xml" "formula/model/lc1b"))
 (comment (out/mcq-xml-res 7 "lc1bm.clj" "lc1b.xml" "formula-min/model/lc1b"))
 ;; logical consequence of a set of formulae
-(comment (out/mcq-xml-res 1 "lc2.clj" "lc2.xml" "formula/model/lc2"))
+(comment (out/mcq-xml-res 1 "lc2.clj" "lc20.xml" "formula/model/lc2"))
 (comment (out/mcq-xml-res 1 "lc2m.clj" "lc2.xml" "formula-min/model/lc2"))
 ;;  model of a formula with 2 variables
 (comment (out/mcq-xml-res 25 "model2.clj" "modelA2.xml" "formula/model/modelA2"))
@@ -134,6 +135,11 @@
                   "subformM.clj"))
 (comment (spit "clean.clj" (clean-quiz 50 7 5)) )
 (comment (sf/to-file 26 (fn [] (prenex-quiz (r/random-formula-prenex 7 4))) "prenex.clj"))
+
+; sequent calculus
+(comment
+  (doseq [no (range 0 5)] (spit "sequents.clj" (sc/generate-problem 6 5 [:p :q :r :s]) :append true))
+  )
 (defn -main
   "Generate questions from MCQ semi-question file.
   Args:

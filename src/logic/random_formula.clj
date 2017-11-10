@@ -82,7 +82,7 @@
               l2 (- l l1 1)]
           [op (random-formula1 l1 lt)
               (random-formula1 l2 lt)])))))
-              
+
 (defn random-formula-prenex
   "Generate a random formula with
   Args:
